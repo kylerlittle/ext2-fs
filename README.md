@@ -1,5 +1,3 @@
-# ext2-file-sys
-
 # EXT2 File System on Virtual FD
 
 ## Description
