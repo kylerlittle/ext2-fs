@@ -7,7 +7,6 @@
 #include <string.h>
 #include "constants.h"
 
-
 GD    *gp;
 SUPER *sp;
 INODE *ip;
@@ -18,8 +17,25 @@ int iblock;
 
 int search(INODE *ip, char *name) {
     int i = 0;
+    char dbuf[BLKSIZE], *cp;
+
     for (i = 0; i < NUM_DIRECT_BLKS; i++) {
-        // if (ip->i_block[i]
+        if (ip->i_block[i] == 0) return 0;   // NOT FOUND
+
+        // Otherwise, search for name in dir; read direct block into dbuf
+        get_block(fd, ip->i_block[i], dbuf);
+
+        dp = (DIR *)dbuf;
+        cp = dbuf;
+
+        while (cp < dbuf + BLKSIZE) {
+            // if name matches with dir's name, return inode number
+            if (!strncmp(dp->name, name, dp->name_len)) {
+                return dp->inode;
+            }
+            cp += dp->rec_len;
+            dp = (DIR *)cp;
+        }
     }
 }
 
@@ -36,15 +52,7 @@ int dir()
     // read GD
     get_block(fd, 2, buf);
     gp = (GD *)buf;
-    /****************
-     printf("%8d %8d %8d %8d %8d %8d\n",
-        gp->bg_block_bitmap,
-        gp->bg_inode_bitmap,
-        gp->bg_inode_table,
-        gp->bg_free_blocks_count,
-        gp->bg_free_inodes_count,
-        gp->bg_used_dirs_count);
-    ****************/ 
+
     iblock = gp->bg_inode_table;   // get inode start block#
     printf("inode_block = %d\n", iblock);
 
@@ -53,6 +61,12 @@ int dir()
 
     // get root inode #2
     ip = (INODE *)buf + 1;         // ip points at 2nd INODE
+
+    // int ino = search(ip, "dir2");
+    // if (ino) printf("ino: %d\n", ino);
+
+    // ip = (INODE *)buf + 1;         // ip points at 2nd INODE
+
     int i;
     for (i = 0; i<NUM_DIRECT_BLKS; i++) {
         if (ip->i_block[i] == 0) {
@@ -60,6 +74,7 @@ int dir()
         }
         // Note: ip->i_block[0-11] will yield a pointer to a direct block
         printf("i_block[%d] = %d\n", i, ip->i_block[i]);
+
         // Read direct block into dbuf
         get_block(fd, ip->i_block[i], dbuf);
         printf(" ino     rec_len   name_len   name\n");

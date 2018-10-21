@@ -8,7 +8,7 @@ Partition disk
 ```
 bash scripts/creat_vdisk.sh
 ```
-Compile desired file with gcc using ```-m32``` flag.
+Compile desired file and ```constants.h``` with gcc using ```-m32``` flag.
 
 Run as:
 ```
