@@ -75,7 +75,7 @@ int inode()
     ***************************/
 }
 
-char *disk = "mydisk";
+char *disk = "../mydisk";
 int main(int argc, char *argv[])
 { 
     if (argc > 1)
