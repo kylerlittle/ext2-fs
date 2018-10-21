@@ -87,7 +87,7 @@ int super()
   printf("s_wtime = %s", ctime(&sp->s_wtime));
 }
 
-char *disk = "mydisk";
+char *disk = "../mydisk";
 
 int main(int argc, char *argv[ ])
 { 
