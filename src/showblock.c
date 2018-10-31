@@ -42,6 +42,8 @@ int search(INODE *ip, char *name) {
         dp = (DIR *)dbuf;
         cp = dbuf;
 
+        // Print stuff like KC wang does to check our work.
+        printf("searching for %s in MINODE = [dev : %d, ino : %d]\n", name, dev, dp->inode);
         printf(" ino     rec_len   name_len   name\n");
 
         while (cp < dbuf + BLKSIZE) {
@@ -115,6 +117,7 @@ int show_block() {
     for (i=0; i < n; i++){
         printf("=================================================\n");
         printf("getino: i=%d   name[%d]=%s\n", i, i, name[i]);
+        
         ino = search(ip, name[i]);
         if (ino == 0) {
             printf("can't find %s\n", name[i]);
@@ -128,8 +131,42 @@ int show_block() {
         get_block(dev, blk, ibuf);
         ip = (INODE *)ibuf + offset;    // ip -> new INODE
     }
-    // ip now points at INODE of pathname
-    
+    // STEP 5: Print direct, indirect, and double indirect block numbers.
+        // Note that ip now points at INODE of pathname
+    printf("DIRECT BLOCK NUMBERS:\n");
+    for (i=0; i < 15; ++i) {
+        if (ip->i_block[i] == 0) break;
+        printf("i_block[%d] = %d\n", i, ip->i_block[i]);
+    }
+    if (i >= 12) {
+        printf("INDIRECT BLOCK NUMBERS:\n");
+        get_block(dev, ip->i_block[12], buf);
+        int * int_p = (int *)buf, counter = 0;
+        while (counter < BLKSIZE / sizeof(int)) {
+            if (*int_p == 0) break;
+            printf("%d  ", *int_p);
+            int_p++; counter++;
+        }
+    }
+    if (i >= 13) {
+        printf("\nDOUBLE INDIRECT BLOCK NUMBERS:\n");
+        get_block(dev, ip->i_block[13], buf);
+        int * int_p = (int *)buf, counter = 0;
+        while (counter < BLKSIZE / sizeof(int)) {
+            if (*int_p == 0) break;
+            get_block(dev, *int_p, ibuf);
+            int * double_int_p = (int *)ibuf, i_counter = 0;
+            while (i_counter < BLKSIZE / sizeof(int)) {
+                if (*double_int_p == 0) break;
+                printf("%d  ", *double_int_p);
+                double_int_p++; i_counter++;
+            }
+            int_p++; counter++;
+        }
+        printf("\n");
+    }
+
+
 
     clear_tok_list(name);
 }
