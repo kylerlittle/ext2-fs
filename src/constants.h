@@ -17,6 +17,6 @@ typedef struct ext2_dir_entry_2 DIR;    // need this for new version of e2fs
 #define NUM_DIRECT_BLKS 12
 
 /* Macro -- String Lengths */
-#define MAX_FILENAME_LEN 256
+#define MAX_FILENAME_LEN 255
 
 #endif
