@@ -10,6 +10,7 @@ PROC proc[NPROC], *running;
 
 char gpath[MAX_FILENAME_LEN];    // holder of component strings in pathname
 char *name[MAX_COMPONENTS];     // assume at most 64 components in pathnames
+char *cmd_argv[MAX_CMDS];
 int n;
 
 int  fd, dev;
@@ -17,17 +18,16 @@ int  nblocks, ninodes, bmap, imap, iblk, inode_start;
 char line[256], cmd[32], pathname[256];
 char *disk = "mydisk";
 
+extern CMD *cmd_table;
+
 int input_help() {
-    printf("");
+    printf("input command : [ls|cd|pwd|quit] ");
 }
 
-void get_input(char *cmd, char *path) {
-  char line[MAX_INPUT_LEN];
-  printf(">> ");
+void get_input(char *line) {
+  input_help();
   fgets(line, MAX_INPUT_LEN, stdin);
   line[strlen(line) - 1] = '\0';
-  sscanf(line, "%s %s", cmd, path);
-  if (!strcmp(cmd, line)) strcpy(path, "");
 }
 
 int main(int argc, char *argv[]) {
@@ -40,18 +40,33 @@ int main(int argc, char *argv[]) {
     mount_root(disk);       // verify ext2 fs, store globals from super/gd block, & start P0/P1 processes
 
     /* cmd loop */
+    char input_line[MAX_INPUT_LEN];
     while (1) {
         /* Snag user input. */
-        get_input(_cmd, _path);
-        if (DEBUG_MODE) printf("cmd: %s\tpath: %s\n", _cmd, _path);
+        get_input(input_line);
+        if (line[0] == '\0')
+            continue;   // user entered nothing; go to next iteration
+
+        /* Tokenize. */
+        int n = tokenize(cmd_argv, input_line, " ");
+
+        if (1) {
+            int i=0;
+            printf("tokenized: ");
+            while (cmd_argv[i]) printf("%s ", cmd_argv[i++]);
+            printf("\n");
+        }
         /* Find the index of the command in the table. */
-        int index = find_cmd(_cmd);
+        int index = get_cmd_index(cmd_argv[0]);
         
         /* Execute command if valid. Otherwise, print error message. */
-        if (is_valid_cmd(index))
-            cmd_ptrs[index](_path);
+        if (index != -1)
+            cmd_table[index].command_as_function(n-1, &cmd_argv[1]);
         else
-            printf("%s: command not found\n", _cmd);
+            printf("%s: command not found\n", cmd_argv[0]);
+
+        /* Clear command token list */
+        clear_tok_list(cmd_argv);
     }
 
     return 0;

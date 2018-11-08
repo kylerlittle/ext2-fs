@@ -48,6 +48,8 @@ for "status" attribute of processes. */
 /* Macro -- String Lengths */
 #define MAX_FILENAME_LEN 255
 #define MAX_COMPONENTS 64
+#define MAX_INPUT_LEN 512
+#define MAX_CMDS 64
 
 /* File System Data Structures */
 typedef struct minode{

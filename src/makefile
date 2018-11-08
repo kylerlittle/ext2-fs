@@ -8,7 +8,7 @@ STUPID_FILES = *.gch
 
 # 'make build'
 build:
-	$(COMPILER) $(C_FLAGS) -o $(BINARY_NAME) main.c util/util.c util/type.h init.c
+	$(COMPILER) -o $(BINARY_NAME) $(C_FLAGS) main.c util/*.c util/type.h init.c cmd/*.c
 
 # 'make run'
 run: build
