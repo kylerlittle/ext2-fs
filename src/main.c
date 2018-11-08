@@ -18,7 +18,7 @@ int  nblocks, ninodes, bmap, imap, iblk, inode_start;
 char line[256], cmd[32], pathname[256];
 char *disk = "mydisk";
 
-extern CMD *cmd_table;
+extern CMD cmd_table[];
 
 int input_help() {
     printf("input command : [ls|cd|pwd|quit] ");

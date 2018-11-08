@@ -32,7 +32,7 @@ for "status" attribute of processes. */
 #define READY 1
 
 /* File System Constants */
-#define BLKSIZE 1024
+#define BLKSIZE  1024
 #define NMINODE    64
 #define NOFT       64
 #define NFD        10
@@ -46,10 +46,10 @@ for "status" attribute of processes. */
 #define NUM_DIRECT_BLKS 12
 
 /* Macro -- String Lengths */
-#define MAX_FILENAME_LEN 255
-#define MAX_COMPONENTS 64
-#define MAX_INPUT_LEN 512
-#define MAX_CMDS 64
+#define MAX_FILENAME_LEN    255
+#define MAX_COMPONENTS       64
+#define MAX_INPUT_LEN       512
+#define MAX_CMDS             64
 
 /* File System Data Structures */
 typedef struct minode{

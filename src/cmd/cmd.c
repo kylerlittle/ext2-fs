@@ -5,7 +5,7 @@ pointing at the name of the command, and then the address of the
 function which executes the command. All functions will accept argc (int)
 and *argv[] since many commands can accept an arbitrary number of parameters.
 */
-CMD *cmd_table = {
+CMD cmd_table[] = {
     {"ls", &my_ls},
     {NULL, NULL}
 };
