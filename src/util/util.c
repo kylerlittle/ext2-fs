@@ -36,7 +36,7 @@ int tokenize(char *tok_list[], char *input_line, char *delimiters)
     printf("tokenized: ");
     while (tok_list[i]) printf("%s ", tok_list[i++]);
     printf("\n");
-    
+
     return n;
 }
 
@@ -231,6 +231,7 @@ int getino(char *pathname)
     iput(mip);
     mip = iget(dev, ino);
   }
+  clear_tok_list(name);  // clean up that malloc shit
   return ino;
 }
 
