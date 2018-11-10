@@ -4,15 +4,14 @@
 A Linux-compatible EXT2 file system. See more information [here](https://www.eecs.wsu.edu/~cs360/proj10.html).
 
 ## Usage
-Partition disk
+Partition disk if no disk present.
 ```
 bash scripts/creat_vdisk.sh
 ```
-Compile desired file and ```constants.h``` with gcc using ```-m32``` flag.
-
-Run as:
+Next, ```cd``` into ```src```.
+Then, run as:
 ```
-./a.out path/to/mydisk
+make run
 ```
 
 ## Help
