@@ -100,4 +100,5 @@ int mount_root(char *disk) {
     printf("root refCount = %d\n", root->refCount);
 
     init_start_proc();
+    printf("root refCount = %d\n", root->refCount);
 }

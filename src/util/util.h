@@ -18,7 +18,6 @@ extern char line[MAX_INPUT_LEN], cmd[32], pathname[MAX_FILENAME_LEN];
 
 /**** Function Prototypes ****/
 int tokenize(char *tok_list[], char *input_line, char *delimiters);
-// int tokenize(char *tok_list[], char *input_line, char *delimiters);
 int clear_tok_list(char *tok_list[]);
 int clear_toks_after_i(char *tok_list[], int i);
 int get_block(int dev, int blk, char *buf);

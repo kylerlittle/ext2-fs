@@ -5,6 +5,8 @@
 /**** Included headers/libraries ****/
 #include "level1/my_ls.h"
 #include "level1/my_quit.h"
+#include "level1/my_pwd.h"
+#include "level1/my_chdir.h"
 #include <stdio.h>
 #include <string.h>
 

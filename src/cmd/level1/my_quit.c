@@ -6,8 +6,7 @@ int my_quit(int argc, char *argv[]) {
     for (i = 0; i < NMINODE; i++)
     {
         mip = &minode[i];
-        if (mip->refCount > 0)
-        iput(mip);
+        if (mip->refCount > 0 && mip->dirty) iput(mip);
     }
     /* Since we syscall exit right here, need to free up the mallocated memory.
     Original argv started at one index less than current (since argv excludes cmd);

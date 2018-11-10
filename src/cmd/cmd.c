@@ -8,6 +8,8 @@ and *argv[] since many commands can accept an arbitrary number of parameters.
 CMD cmd_table[] = {
     {"ls",          &my_ls},
     {"quit",        &my_quit},
+    {"pwd",         &my_pwd},
+    {"cd",          &my_chdir},
     {NULL,          NULL}
 };
 

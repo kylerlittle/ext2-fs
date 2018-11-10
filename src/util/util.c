@@ -76,10 +76,10 @@ MINODE *iget(int dev, int ino)
   for (i = 0; i < NMINODE; i++)
   {
     mip = &minode[i];
-    if (mip->dev == dev && mip->ino == ino)
+    if (mip->dev == dev && mip->ino == ino && mip->refCount > 0)
     {
       mip->refCount++;  // if found: inc its refCount by 1;
-      printf("found [%d %d] as minode[%d] in core\n", dev, ino, i);
+      if (DEBUG_MODE) printf("found [%d %d] as minode[%d] in core\n", dev, ino, i);
       return mip;
     }
   }
@@ -88,16 +88,18 @@ MINODE *iget(int dev, int ino)
   //      find a FREE minode (refCount = 0); Let mip-> to this minode;
   //      set its refCount = 1;
   //      set its dev, ino
-
   for (i = 0; i < NMINODE; i++)
   {
     mip = &minode[i];
     if (mip->refCount == 0)
     {
-      printf("allocating NEW minode[%d] for [%d %d]\n", i, dev, ino);
+      if (DEBUG_MODE) printf("allocating NEW minode[%d] for [%d %d]\n", i, dev, ino);
       mip->refCount = 1;
       mip->dev = dev;
       mip->ino = ino;
+      mip->dirty = 0;
+      mip->mounted = 0;
+      mip->mptr = NULL;
       // 3. Lastly, load INODE of (dev, ino) into mip->INODE:
       // printf("iget: ino=%d blk=%d offset=%d\n", ino, blk, offset);
 
@@ -212,7 +214,7 @@ int getino(char *pathname)
     mip = iget(running->cwd->dev, running->cwd->ino);
 
   // strcpy(temp, pathname);
-  tokenize(name, pathname, "/");
+  n = tokenize(name, pathname, "/");
 
   for (i = 0; i < n; i++)
   {

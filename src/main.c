@@ -40,7 +40,6 @@ int main(int argc, char *argv[]) {
     mount_root(disk);       // verify ext2 fs, store globals from super/gd block, & start P0/P1 processes
 
     /* cmd loop */
-    char input_line[MAX_INPUT_LEN];
     while (1) {
         /* Snag user input. */
         get_input(line);
