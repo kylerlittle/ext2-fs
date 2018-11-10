@@ -12,7 +12,7 @@ extern MINODE *root;
 extern PROC proc[NPROC], *running;
 extern int fd, dev;
 extern int nblocks, ninodes, bmap, imap, iblk, inode_start;
-extern char line[256], cmd[32], pathname[256];
+extern char line[MAX_INPUT_LEN], cmd[32], pathname[256];
 
 /**** Function Prototypes ****/
 int init();

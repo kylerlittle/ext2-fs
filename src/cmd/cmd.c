@@ -6,8 +6,9 @@ function which executes the command. All functions will accept argc (int)
 and *argv[] since many commands can accept an arbitrary number of parameters.
 */
 CMD cmd_table[] = {
-    {"ls", &my_ls},
-    {NULL, NULL}
+    {"ls",          &my_ls},
+    {"quit",        &my_quit},
+    {NULL,          NULL}
 };
 
 int get_cmd_index(char *cmd) {

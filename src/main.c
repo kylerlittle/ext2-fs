@@ -15,7 +15,7 @@ int n;
 
 int  fd, dev;
 int  nblocks, ninodes, bmap, imap, iblk, inode_start;
-char line[256], cmd[32], pathname[256];
+char line[MAX_INPUT_LEN], cmd[32], pathname[256];
 char *disk = "mydisk";
 
 extern CMD cmd_table[];
@@ -43,19 +43,13 @@ int main(int argc, char *argv[]) {
     char input_line[MAX_INPUT_LEN];
     while (1) {
         /* Snag user input. */
-        get_input(input_line);
+        get_input(line);
         if (line[0] == '\0')
             continue;   // user entered nothing; go to next iteration
 
         /* Tokenize. */
-        int n = tokenize(cmd_argv, input_line, " ");
+        int n = tokenize(cmd_argv, line, " ");
 
-        if (1) {
-            int i=0;
-            printf("tokenized: ");
-            while (cmd_argv[i]) printf("%s ", cmd_argv[i++]);
-            printf("\n");
-        }
         /* Find the index of the command in the table. */
         int index = get_cmd_index(cmd_argv[0]);
         

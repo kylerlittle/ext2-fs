@@ -11,27 +11,33 @@ char *name[MAX_COMPONENTS];
 int n;
 int fd, dev;
 int nblocks, ninodes, bmap, imap, inode_start;
-char line[256], cmd[32], pathname[256];
+char line[MAX_INPUT_LEN], cmd[32], pathname[256];
 
-int tokenize(char *pathname)
+int tokenize(char *tok_list[], char *input_line, char *delimiters)
 {
-  int i;
-  char *s;
-  printf("tokenize %s\n", pathname);
-  strcpy(gpath, pathname);
-  n = 0;
+    char *s;
+    int n = 0;
+    
+    /* Clear tok_list */
+    clear_tok_list(tok_list);
 
-  s = strtok(gpath, "/");
+    strcpy(gpath, input_line);  // make copy of input_line; work with this
+    s = strtok(gpath, delimiters);
+    while (s) {
+        tok_list[n] = (char*)malloc(strlen(s) + 1);
+        strcpy(tok_list[n++], s);
+        s = strtok(NULL, delimiters);
+    }
+    /* Mark the end of the tok list */
+    tok_list[n] = NULL;
 
-  while (s)
-  {
-    name[n] = s;
-    n++;
-    s = strtok(0, "/");
-  }
-
-  for (i = 0; i < n; i++) printf("%s  ", name[i]);
-  printf("\n");
+    /* Debug info */
+    int i=0;
+    printf("tokenized: ");
+    while (tok_list[i]) printf("%s ", tok_list[i++]);
+    printf("\n");
+    
+    return n;
 }
 
 int clear_tok_list(char *tok_list[]) {
@@ -110,7 +116,7 @@ MINODE *iget(int dev, int ino)
 }
 
 
-int iput(MINODE *mip) // dispose a used minode by mip
+void iput(MINODE *mip) // dispose a used minode by mip
 {
   int i, block, offset;
   char buf[BLKSIZE];
@@ -193,7 +199,7 @@ int getino(char *pathname)
 { 
   // SAME as LAB6 program: just return the pathname's ino;
   int i, ino, blk, disp;
-  char buf[BLKSIZE];
+  // char temp[MAX_FILENAME_LEN];
   INODE *ip;
   MINODE *mip;
 
@@ -206,8 +212,8 @@ int getino(char *pathname)
   else
     mip = iget(running->cwd->dev, running->cwd->ino);
 
-  strcpy(buf, pathname);
-  tokenize(buf);
+  // strcpy(temp, pathname);
+  tokenize(name, pathname, "/");
 
   for (i = 0; i < n; i++)
   {

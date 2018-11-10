@@ -6,7 +6,7 @@ PROC proc[NPROC], *running;
 
 int fd, dev;
 int nblocks, ninodes, bmap, imap, iblk, inode_start;
-char line[256], cmd[32], pathname[256];
+char line[MAX_INPUT_LEN], cmd[32], pathname[256];
 
 /* Initialize data structures for level 1. */
 int init() {
