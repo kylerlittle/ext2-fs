@@ -11,7 +11,7 @@ char *name[MAX_COMPONENTS];
 int n;
 int fd, dev;
 int nblocks, ninodes, bmap, imap, inode_start;
-char line[MAX_INPUT_LEN], cmd[32], pathname[256];
+char line[MAX_INPUT_LEN], cmd[32], pathname[MAX_FILENAME_LEN];
 
 int tokenize(char *tok_list[], char *input_line, char *delimiters)
 {
@@ -79,7 +79,7 @@ MINODE *iget(int dev, int ino)
     if (mip->dev == dev && mip->ino == ino)
     {
       mip->refCount++;  // if found: inc its refCount by 1;
-      //printf("found [%d %d] as minode[%d] in core\n", dev, ino, i);
+      printf("found [%d %d] as minode[%d] in core\n", dev, ino, i);
       return mip;
     }
   }
@@ -165,7 +165,6 @@ int search(MINODE *mip, char *name)
     if (ip->i_block[i] == 0)
       return 0;
     printf("search: i=%d  i_block[%d]=%d\n", i, i, ip->i_block[i]);
-    //getchar();
 
     get_block(dev, ip->i_block[i], sbuf);
     dp = (DIR *)sbuf;
@@ -189,7 +188,7 @@ int search(MINODE *mip, char *name)
       dp = (DIR *)cp;
     }
   }
-  return (0);
+  return 0;
 }
 
 

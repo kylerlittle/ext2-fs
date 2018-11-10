@@ -15,7 +15,7 @@ int n;
 
 int  fd, dev;
 int  nblocks, ninodes, bmap, imap, iblk, inode_start;
-char line[MAX_INPUT_LEN], cmd[32], pathname[256];
+char line[MAX_INPUT_LEN], cmd[32], pathname[MAX_FILENAME_LEN];
 char *disk = "mydisk";
 
 extern CMD cmd_table[];
