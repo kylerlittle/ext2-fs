@@ -3,7 +3,7 @@ COMPILER = gcc
 C_FLAGS = -m32
 BINARY_NAME = ext2_file_system
 RM = rm -f
-RM_R = rm -rf
+RM_R = rm
 STUPID_FILES = *.gch
 
 # 'make build'

@@ -17,7 +17,8 @@ extern int nblocks, ninodes, bmap, imap, inode_start;
 extern char line[256], cmd[32], pathname[256];
 
 /**** Function Prototypes ****/
-int tokenize(char *tok_list[], char *input_line, char *delimiters);
+int tokenize(char *pathname);
+// int tokenize(char *tok_list[], char *input_line, char *delimiters);
 int clear_tok_list(char *tok_list[]);
 int clear_toks_after_i(char *tok_list[], int i);
 int get_block(int dev, int blk, char *buf);

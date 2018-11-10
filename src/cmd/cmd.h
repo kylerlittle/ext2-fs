@@ -3,8 +3,9 @@
 #define __CMD__
 
 /**** Included headers/libraries ****/
-#include "../util/util.h"
 #include "level1/my_ls.h"
+#include <stdio.h>
+#include <string.h>
 
 /**** Function Prototypes ****/
 int get_cmd_index(char *cmd);
