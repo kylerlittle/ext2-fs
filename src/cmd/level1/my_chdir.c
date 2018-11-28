@@ -32,7 +32,7 @@ int my_chdir(int argc, char *argv[])
   else
     dev = running->cwd->dev;
   strcpy(temp, argv[0]);
-  ino = getino(temp);
+  ino = getino(&dev, temp);
 
   if (!ino)
   {

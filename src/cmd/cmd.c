@@ -10,6 +10,7 @@ CMD cmd_table[] = {
     {"quit",        &my_quit},
     {"pwd",         &my_pwd},
     {"cd",          &my_chdir},
+    {"link",        &my_link},
     {NULL,          NULL}
 };
 
