@@ -7,6 +7,7 @@
 #include "level1/my_quit.h"
 #include "level1/my_pwd.h"
 #include "level1/my_chdir.h"
+#include "level1/my_link.h"
 #include <stdio.h>
 #include <string.h>
 

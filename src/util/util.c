@@ -129,8 +129,10 @@ void iput(MINODE *mip) // dispose a used minode by mip
 
   mip->refCount--;
 
+  // if refs still exist, don't write back yet since unable to sync
   if (mip->refCount > 0)
     return;
+  // if not dirty, no need to write back
   if (!mip->dirty)
     return;
 
@@ -194,9 +196,8 @@ int search(MINODE *mip, char *name)
 }
 
 
-// retrun inode number of pathname
-
-int getino(char *pathname)
+/* Return the inode number of pathname on device dev. Return 0 if doesn't exist. */
+int getino(int *dev, char *pathname)
 { 
   // SAME as LAB6 program: just return the pathname's ino;
   int i, ino, blk, disp;
@@ -204,12 +205,12 @@ int getino(char *pathname)
   INODE *ip;
   MINODE *mip;
 
-  printf("getino: pathname=%s\n", pathname);
+  printf("getino: pathname=%s dev=%d\n", pathname, *dev);
   if (strcmp(pathname, "/") == 0)
     return 2;
 
   if (pathname[0] == '/')
-    mip = iget(dev, 2);
+    mip = iget(*dev, 2);
   else
     mip = iget(running->cwd->dev, running->cwd->ino);
 
@@ -230,7 +231,7 @@ int getino(char *pathname)
       return 0;
     }
     iput(mip);
-    mip = iget(dev, ino);
+    mip = iget(*dev, ino);
   }
   clear_tok_list(name);  // clean up that malloc shit
   return ino;

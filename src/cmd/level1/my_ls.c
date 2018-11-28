@@ -111,7 +111,7 @@ int my_ls(int argc, char *argv[]) {
     else
     {
         dev = root->dev;
-        ino = getino(argv[0]);
+        ino = getino(&dev, argv[0]);
         if (ino == 0)
         {
             printf("no such file %s\n", argv[0]);

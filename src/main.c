@@ -21,7 +21,14 @@ char *disk = "mydisk";
 extern CMD cmd_table[];
 
 int input_help() {
-    printf("input command : [ls|cd|pwd|quit] ");
+    int i = 0;
+    printf("\n*********************** MENU ***********************");
+    while (cmd_table[i].command_as_string) {
+        if (i % 10 == 0) printf("*\n* "); // ten commands per line
+        printf("%s ", cmd_table[i].command_as_string);
+        i++;
+    }
+    printf("*\n*****************************************************\ninput command : ");
 }
 
 void get_input(char *line) {
