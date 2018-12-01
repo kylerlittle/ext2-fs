@@ -475,3 +475,7 @@ void rmChild(MINODE *parent, char *name)
 	return;
 }
 
+/* Remove all of mip->INODE's data blocks! Then iput back to disc. */
+int truncate(MINODE *mip) {
+
+}

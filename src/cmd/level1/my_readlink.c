@@ -1,4 +1,4 @@
-#include "my_link.h"
+#include "my_readlink.h"
 
 /**** globals defined in main.c file ****/
 MINODE minode[NMINODE];
@@ -11,8 +11,8 @@ int fd, dev;
 int nblocks, ninodes, bmap, imap, inode_start;
 char line[MAX_INPUT_LEN], cmd[32], pathname[MAX_FILENAME_LEN];
 
-/* Create link argv[1] for file argv[0]; if error occurs, return -1 */
-int my_link(int argc, char *argv[])
+/* Read link argv[0]; if error occurs, return -1 */
+int my_readlink(int argc, char *argv[])
 {
   /* argv[0] is oldFileName; argv[1] is the new link to argv[0]
   IDEA: create new file which has same inode # as that of argv[0];
