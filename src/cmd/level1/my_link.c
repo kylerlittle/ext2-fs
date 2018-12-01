@@ -81,6 +81,7 @@ int my_link(int argc, char *argv[])
   old_mip->dirty = 1;
   printf("my_link: link count for %s is now %d\n", argv[0], old_mip->INODE.i_links_count);
   
+  // Write back to disc baby!!
   iput(old_mip);
   iput(parent_mip);
 

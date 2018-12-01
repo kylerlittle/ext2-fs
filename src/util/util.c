@@ -304,12 +304,12 @@ int enter_name(MINODE* mip, int myino, char* myname)
   int i;
 	INODE *parent_ip = &mip->INODE;
 
-	char buf[1024];
+	char buf[BLKSIZE];
 	char *cp;
 	DIR *dp;
 
 	int need_len = 0, ideal = 0, remain = 0;
-	int bno = 0, block_size = 1024;
+	int bno = 0, block_size = BLKSIZE;
 
 	//go through parent data blocks
 	for(i = 0; i < parent_ip->i_size / BLKSIZE; i++)
@@ -376,7 +376,7 @@ void rmChild(MINODE *parent, char *name)
 	DIR *dp;
 	DIR *prev_dp;
 	DIR *last_dp;
-	char buf[1024];
+	char buf[BLKSIZE];
 	char *cp;
 	char temp[64];
 	char *last_cp;
@@ -399,7 +399,7 @@ void rmChild(MINODE *parent, char *name)
 		printf("dp at %s\n", dp->name);
 
 		//iterate through the entries
-		while(cp < buf + 1024)
+		while(cp < buf + BLKSIZE)
 		{
 			strncpy(temp, dp->name, dp->name_len);
 			temp[dp->name_len] = 0;
@@ -409,13 +409,13 @@ void rmChild(MINODE *parent, char *name)
 			if(!strcmp(temp, name))//found it time to remove
 			{
 				printf("child found!\n");
-				if(cp == buf && cp + dp->rec_len == buf + 1024)
+				if(cp == buf && cp + dp->rec_len == buf + BLKSIZE)
 				{
 					//it's the first and only entry, need to delete entire block
 					free(buf);
 					bdealloc(dev, ip->i_block[i]);//deallocate block
 
-					p_ip->i_size -= 1024;
+					p_ip->i_size -= BLKSIZE;
 
 					//shift blocks left
 					while(p_ip->i_block[i + 1] && i + 1 < 12)
@@ -425,7 +425,7 @@ void rmChild(MINODE *parent, char *name)
 						put_block(dev, p_ip->i_block[i - 1], buf);
 					}
 				}
-				else if(cp + dp->rec_len == buf + 1024)
+				else if(cp + dp->rec_len == buf + BLKSIZE)
 				{
 					//just have to remove the last entry
 					printf("removing last entry\n");
@@ -453,7 +453,7 @@ void rmChild(MINODE *parent, char *name)
 					last_dp->rec_len += dp->rec_len;
 
 					start = cp + dp->rec_len;
-					end = buf + 1024;
+					end = buf + BLKSIZE;
 
 					memmove(cp, start, end - start);//built in function. move memory left
 

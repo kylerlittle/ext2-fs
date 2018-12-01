@@ -57,32 +57,4 @@ int my_readlink(int argc, char *argv[])
     printf("my_link: %s is a directory; can't link to dir\n", argv[0]);
     return -1;
   }
-
-  // check directory of argv[1] exists and is a DIR but that file does not yet exist in that directory (already did latter above)
-  char parent_dir[MAX_FILENAME_LEN], link_child[MAX_FILENAME_LEN];
-  strcpy(parent_dir, dirname(argv[1]));
-  strcpy(link_child, basename(argv[1]));
-
-  parent_inode = getino(&new_dev, parent_dir);  // return non-zero if exists
-  if (parent_inode == 0) {
-    printf("my_link: %s directory doesn't exist\n", parent_dir);
-    return -1;
-  }
-
-  // Add an entry [ino rec_len name_len argv[1]] to the data block of parent_dir
-  // This creates argv[1], which has the SAME ino as that of argv[0]; note both must be on same dev!
-  parent_mip = iget(new_dev, parent_inode);
-  // append entry to parent_mip's data block; store result in int.
-  
-  int result = enter_name(parent_mip, old_mip->ino, link_child);
-
-  // Increment link count; mark as dirty; write back
-  old_mip->INODE.i_links_count++;
-  old_mip->dirty = 1;
-  printf("my_link: link count for %s is now %d\n", argv[0], old_mip->INODE.i_links_count);
-  
-  iput(old_mip);
-  iput(parent_mip);
-
-  return result;
 }
