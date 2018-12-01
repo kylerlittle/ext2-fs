@@ -85,8 +85,8 @@ int my_unlink(int argc, char *argv[])
     link_mip->INODE.i_block array contains pointers to the data blocks. Simply go to address, deallocate (memset 0),
     then set the pointer to null. Kinda complicated for indirect data blocks, but whatevs */
     printf("my_unlink: link count for %s is 0, so deallocating all data blocks\n", link_child);
-    // Before truncating, check 
-    truncate(link_mip);
+    // Before truncating, check if symlink... if it is, don't truncate since no data blocks.
+    if (!S_ISLNK(link_mip->INODE.i_mode)) truncate(link_mip);
     iput(link_mip);
   }
   return 0;
