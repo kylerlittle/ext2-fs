@@ -475,7 +475,145 @@ void rmChild(MINODE *parent, char *name)
 	return;
 }
 
+int tst_bit(char *buf, int bit)
+{
+  int i, j;
+  i = bit/8; j=bit%8;
+  if (buf[i] & (1 << j))
+     return 1;
+  return 0;
+}
+
+int set_bit(char *buf, int bit)
+{
+  int i, j;
+  i = bit/8; j=bit%8;
+  buf[i] |= (1 << j);
+}
+
+int clr_bit(char *buf, int bit)
+{
+  int i, j;
+  i = bit/8; j=bit%8;
+  buf[i] &= ~(1 << j);
+}
+
+int decFreeInodes(int dev)
+{
+  char buf[BLKSIZE];
+
+  // dec free inodes count in SUPER and GD
+  get_block(dev, 1, buf);
+  sp = (SUPER *)buf;
+  sp->s_free_inodes_count--;
+  put_block(dev, 1, buf);
+
+  get_block(dev, 2, buf);
+  gp = (GD *)buf;
+  gp->bg_free_inodes_count--;
+  put_block(dev, 2, buf);
+}
+
+int incFreeInodes(int dev)
+{
+  char buf[BLKSIZE];
+
+  // dec free inodes count in SUPER and GD
+  get_block(dev, 1, buf);
+  sp = (SUPER *)buf;
+  sp->s_free_inodes_count--;
+  put_block(dev, 1, buf);
+
+  get_block(dev, 2, buf);
+  gp = (GD *)buf;
+  gp->bg_free_inodes_count++;
+  put_block(dev, 2, buf);
+}
+
+int ialloc(int dev)
+{
+  int  i;
+  char buf[BLKSIZE];
+
+  // read inode_bitmap block
+  get_block(dev, imap, buf);
+
+  for (i=0; i < ninodes; i++){
+    if (tst_bit(buf, i)==0){
+       set_bit(buf,i);
+       decFreeInodes(dev);
+
+       put_block(dev, imap, buf);
+
+       return i+1;
+    }
+  }
+  printf("ialloc(): no more free inodes\n");
+  return 0;
+}
+
+int balloc(int dev)
+{
+  int  i;
+  char buf[BLKSIZE];
+
+  // read inode_bitmap block
+  get_block(dev, bmap, buf);
+
+  for (i=0; i < nblocks; i++){
+    if (tst_bit(buf, i)==0){
+       set_bit(buf,i);
+       decFreeInodes(dev);
+
+       put_block(dev, bmap, buf);
+
+       return i+1;
+    }
+  }
+  printf("balloc(): no more free blocks\n");
+  return 0;
+}
+
 /* Remove all of mip->INODE's data blocks! Then iput back to disc. */
 int truncate(MINODE *mip) {
-
+  printf("DIRECT BLOCK NUMBERS:\n");
+  int i;
+  char buf[BLKSIZE], indirect_buf[BLKSIZE];
+  for (i=0; i < 15; ++i) {
+      if (ip->i_block[i] == 0) break;
+      printf("i_block[%d] = %d\n", i, ip->i_block[i]);
+      // remove this
+      ip->i_block[i] = 0;
+  }
+  if (i >= 12) {
+      printf("INDIRECT BLOCK NUMBERS:\n");
+      get_block(dev, ip->i_block[12], buf);
+      int * int_p = (int *)buf, counter = 0;
+      while (counter < BLKSIZE / sizeof(int)) {
+          if (*int_p == 0) break;
+          printf("%d  ", *int_p);
+          // remove this
+          int_p++; counter++;
+      }
+  }
+  ip->i_block[12] = 0; // clear this
+  if (i >= 13) {
+      printf("\nDOUBLE INDIRECT BLOCK NUMBERS:\n");
+      get_block(dev, ip->i_block[13], buf);
+      int * int_p = (int *)buf, counter = 0;
+      while (counter < BLKSIZE / sizeof(int)) {
+          if (*int_p == 0) break;
+          get_block(dev, *int_p, indirect_buf);
+          int * double_int_p = (int *)indirect_buf, i_counter = 0;
+          while (i_counter < BLKSIZE / sizeof(int)) {
+              if (*double_int_p == 0) break;
+              printf("%d  ", *double_int_p);
+              // remove this
+              double_int_p++; i_counter++;
+          }
+          int_p++; counter++;
+      }
+      printf("\n");
+  }
+  ip->i_block[13] = 0; // clear this
 }
