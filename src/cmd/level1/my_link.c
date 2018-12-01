@@ -73,13 +73,15 @@ int my_link(int argc, char *argv[])
   // This creates argv[1], which has the SAME ino as that of argv[0]; note both must be on same dev!
   parent_mip = iget(new_dev, parent_inode);
   // append entry to parent_mip's data block; store result in int.
-  int result;
+  
+  int result = enter_name(parent_mip, old_mip->ino, link_child);
 
   // Increment link count; mark as dirty; write back
   old_mip->INODE.i_links_count++;
   old_mip->dirty = 1;
   printf("my_link: link count for %s is now %d\n", argv[0], old_mip->INODE.i_links_count);
   
+  // Write back to disc baby!!
   iput(old_mip);
   iput(parent_mip);
 

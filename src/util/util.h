@@ -30,5 +30,7 @@ int findmyname(MINODE *parent, u32 myino, char *myname);
 int findino(MINODE *mip, u32 *myino);
 int enter_name(MINODE* mip, int myino, char* myname);
 void rmChild(MINODE *parent, char *name);
+int truncate(MINODE *mip);
+
 #endif
 /*********************************************************/

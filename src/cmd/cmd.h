@@ -8,6 +8,8 @@
 #include "level1/my_pwd.h"
 #include "level1/my_chdir.h"
 #include "level1/my_link.h"
+#include "level1/my_unlink.h"
+#include "level1/my_readlink.h"
 #include <stdio.h>
 #include <string.h>
 
