@@ -2,6 +2,7 @@
 #ifndef __MKDIR_H__
 #define __MKDIR_H__
 
+#include "../../util/util.h" //will be included in header
 
 void mk_dir(char path[MAX_FILENAME_LEN]);
 int enter_name(MINODE *minodePtr, int ino, char *name);
