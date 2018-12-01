@@ -298,3 +298,74 @@ int findino(MINODE *mip, u32 *myino)
   dp = (DIR *)cp;
   return dp->inode;
 }
+
+int enter_name(MINODE* mip, int myino, char* myname)
+{
+  int i;
+	INODE *parent_ip = &mip->INODE;
+
+	char buf[1024];
+	char *cp;
+	DIR *dp;
+
+	int need_len = 0, ideal = 0, remain = 0;
+	int bno = 0, block_size = 1024;
+
+	//go through parent data blocks
+	for(i = 0; i < parent_ip->i_size / BLKSIZE; i++)
+	{
+		if(parent_ip->i_block[i] == 0)
+			break;//empty data block, break
+
+		//get bno to use in get_block
+		bno = parent_ip->i_block[i];
+
+		get_block(dev, bno, buf);
+
+		dp = (DIR*)buf;
+		cp = buf;
+
+		//need length
+		need_len = 4 * ( (8 + strlen(myname) + 3) / 4);
+		printf("need len is %d\n", need_len);
+
+		//step into last dir entry
+		while(cp + dp->rec_len < buf + BLKSIZE)
+		{
+			cp += dp->rec_len;
+			dp = (DIR*)cp;
+		}
+
+		printf("last entry is %s\n", dp->name);
+		cp = (char*)dp;
+
+		//ideal length uses name len of last dir entry
+		ideal = 4 * ( (8 + dp->name_len + 3) / 4);
+
+		//let remain = last entry's rec_len - its ideal length
+		remain = dp->rec_len - ideal;
+		printf("remain is %d\n", remain);
+
+
+		if(remain >= need_len)
+		{
+			//enter the new entry as the last entry and trim the previous entry to its ideal length
+			dp->rec_len = ideal;
+
+			cp += dp->rec_len;
+			dp = (DIR*)cp;
+
+			dp->inode = myino;
+			dp->rec_len = block_size - ((u32)cp - (u32)buf);
+			printf("rec len is %d\n", dp->rec_len);
+			dp->name_len = strlen(myname);
+			dp->file_type = EXT2_FT_DIR;
+			strcpy(dp->name, myname);
+
+			put_block(dev, bno, buf);
+
+			return 1;
+		}
+	}
+}
+
