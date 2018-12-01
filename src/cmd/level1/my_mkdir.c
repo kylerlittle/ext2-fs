@@ -1,6 +1,14 @@
 
 #include "my_mkdir.h"
 
+
+int my_mkdir(int argc, char*argv[])
+{
+    //argv[0]
+    mk_dir(argv[0]);
+    
+
+}
 //THIS ENTIRE FUNCTION IS EXPLAINED IN PAGE 332
 void mk_dir(char path[MAX_FILENAME_LEN])
 {
@@ -18,7 +26,7 @@ void mk_dir(char path[MAX_FILENAME_LEN])
     strcpy(t2, path);
 
     //dirname holds pathname up to final /
-    strcpy(parent, dirname(t1);
+    strcpy(parent, dirname(t1));
     //basename returns following last /
     strcpy(child, basename(t2));
 
@@ -26,7 +34,7 @@ void mk_dir(char path[MAX_FILENAME_LEN])
     ino=getino(running->cwd, parent); //returns current working directory
     printf("Inode: %d\n", ino);
     minodePtr=iget(dev,ino); //refer to page 323 in sys programming book
-    inodePtr=&minodePtr->INODE
+    inodePtr=&minodePtr->INODE;
 
     if(!S_ISDIR(inodePtr->i_mode)) //imode field first 4 bits is file type,1000=REGfile 0100=DIR
     {
@@ -34,7 +42,7 @@ void mk_dir(char path[MAX_FILENAME_LEN])
         return;
     }
 
-    if(getino(running->>cwd, path)!=0)
+    if(getino(running->cwd, path)!=0)
     {
         printf("ERROR: %s is already a directory\n", path);
         return;
@@ -61,16 +69,18 @@ void mk_dir(char path[MAX_FILENAME_LEN])
 
 int enter_name(MINODE *minodePtr, int ino, char *name)
 {
+    int i=0;
     INODE *parent_inodePtr;
     parent_inodePtr = &minodePtr->INODE;
-    char buf[BLKSIZE] char *cp;
+    char buf[BLKSIZE]; 
+    char *cp;
     DIR *dp;
     int bno = 0;
     int need_length = 0;
     int ideal_length = 0;
     int remain;
     //can assume only 12 direct blocks
-    for (int i = 0; i < parent_inodePtr->i_size / BLKSIZE; i++)
+    for (; i < parent_inodePtr->i_size / BLKSIZE; i++)
     {
         if (parent_inodePtr->i_block[i] == 0) //page 334
         {
@@ -100,7 +110,7 @@ int enter_name(MINODE *minodePtr, int ino, char *name)
         ideal_length = 4 * ((8 + dp->name_len + 3) / 4);
 
         //now whats remaining is remain which is the last entry rec_len-ideal_length
-        remain = dp->rec_length - ideal_length;
+        remain = dp->rec_len - ideal_length;
         printf("remain: %d\n", remain);
         if (remain >= need_length)
         {
@@ -110,7 +120,7 @@ int enter_name(MINODE *minodePtr, int ino, char *name)
             dp = (DIR *)cp;
 
             dp->inode = ino;
-            dp->rec_len = block_size - ((u32)cp - (u32)buf);
+            dp->rec_len = 1024 - ((u32)cp - (u32)buf);
             printf("rec_len: %d\n", dp->rec_len);
             dp->name_len = strlen(name);
             dp->file_type = EXT2_FT_DIR; //this is 2, and indicates directory file
@@ -134,7 +144,7 @@ int enter_name(MINODE *minodePtr, int ino, char *name)
     return 1;
 }
 //refer to page 332 11.8.1
-int sw_kl_mkdir(MINODE *minodePtr, char *child)
+int sw_kl_mkdir(MINODE *parent_minodePtr, char *child)
 {
     int ino=ialloc(dev);
     int bno=balloc(dev);
@@ -154,16 +164,16 @@ int sw_kl_mkdir(MINODE *minodePtr, char *child)
     inodePtr->i_uid=running->uid; //owner uid
     inodePtr->i_gid=running->gid; //group id
     inodePtr->i_size=BLKSIZE; //size in bytes
-    ip->i_links_count=2; //links count is 2 you have . and ..
-    ip->i_atime=ip->i_ctime=ip->i_mtime=time(0L);
-    ip->i_blocks=2; //block count in 512 byte chunks
-    ip->i_block[0]=bno; //the new directory has one data block
+    inodePtr->i_links_count=2; //links count is 2 you have . and ..
+    inodePtr->i_atime=ip->i_ctime=ip->i_mtime=time(0L);
+    inodePtr->i_blocks=2; //block count in 512 byte chunks
+    inodePtr->i_block[0]=bno; //the new directory has one data block
     for (int i=1;i<15;i++)
     {
-        ip->i_block[i]=0;
+        inodePtr->i_block[i]=0;
     }
-    mip->dirty=1;
-    iput(mip);
+    minodePtr->dirty=1;
+    iput(minodePtr);
 
     //we need to include . and .. page 334 (4).3
     get_block(dev, bno, buf);
@@ -178,15 +188,15 @@ int sw_kl_mkdir(MINODE *minodePtr, char *child)
     cp+=dp->rec_len;
     dp=(DIR*)cp;
 
-    dp->inode=minodePtr->ino;
+    dp->inode=parent_minodePtr->ino;
     dp->rec_len=BLKSIZE-12;
     dp->name_len=2;
     dp->file_type=(u8)EXT2_FT_DIR;
-    dp->name[0]=d->name[1]='.';
+    dp->name[0]=dp->name[1]='.';
 
     //write to block on disk
     put_block(dev,bno,buf);
-    enter_name(minodePtr, ino, child); //puts into the parents directory
+    enter_name(parent_minodePtr, ino, child); //puts into the parents directory
     return 1;
 
 }
