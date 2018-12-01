@@ -369,3 +369,109 @@ int enter_name(MINODE* mip, int myino, char* myname)
 	}
 }
 
+void rmChild(MINODE *parent, char *name)
+{
+	int i;
+	INODE *p_ip = &parent->INODE;
+	DIR *dp;
+	DIR *prev_dp;
+	DIR *last_dp;
+	char buf[1024];
+	char *cp;
+	char temp[64];
+	char *last_cp;
+	int start, end;
+
+	printf("going to remove %s\n", name);
+	printf("parent size is %d\n", p_ip->i_size);
+
+	//iterate through blocks
+	for(i = 0; i < 12 ; i++)
+	{
+		if(p_ip->i_block[i] == 0)//empty block return
+			return;
+
+		//load the block into buf
+		get_block(dev, p_ip->i_block[i], buf);
+		cp = buf;
+		dp = (DIR*)buf;
+
+		printf("dp at %s\n", dp->name);
+
+		//iterate through the entries
+		while(cp < buf + 1024)
+		{
+			strncpy(temp, dp->name, dp->name_len);
+			temp[dp->name_len] = 0;
+
+			printf("dp is at %s\n", temp);
+
+			if(!strcmp(temp, name))//found it time to remove
+			{
+				printf("child found!\n");
+				if(cp == buf && cp + dp->rec_len == buf + 1024)
+				{
+					//it's the first and only entry, need to delete entire block
+					free(buf);
+					bdealloc(dev, ip->i_block[i]);//deallocate block
+
+					p_ip->i_size -= 1024;
+
+					//shift blocks left
+					while(p_ip->i_block[i + 1] && i + 1 < 12)
+					{
+						i++;
+						get_block(dev, p_ip->i_block[i], buf);
+						put_block(dev, p_ip->i_block[i - 1], buf);
+					}
+				}
+				else if(cp + dp->rec_len == buf + 1024)
+				{
+					//just have to remove the last entry
+					printf("removing last entry\n");
+					prev_dp->rec_len += dp->rec_len;
+					put_block(dev, p_ip->i_block[i], buf);
+				}
+				else
+				{
+					//not last entry, this is where we have problems
+					//printf("Before dp is %s\n", dp->name);
+
+					last_dp = (DIR*)buf;
+					last_cp = buf;
+
+					//step into last entry
+					while(last_cp + last_dp->rec_len < buf + BLKSIZE)
+					{
+						//printf("last_dp at %s\n", last_dp->name);
+						last_cp += last_dp->rec_len;
+						last_dp = (DIR*)last_cp;
+					}
+
+					printf("%s and %s\n", dp->name, last_dp->name);
+
+					last_dp->rec_len += dp->rec_len;
+
+					start = cp + dp->rec_len;
+					end = buf + 1024;
+
+					memmove(cp, start, end - start);//built in function. move memory left
+
+					put_block(dev, p_ip->i_block[i], buf);
+
+				}
+
+				parent->dirty = 1;
+				iput(parent);
+				return;
+			}//end of child found
+
+			prev_dp = dp;
+			cp += dp->rec_len;
+			dp = (DIR*)cp;
+		}
+	}
+
+	return;
+}
+
