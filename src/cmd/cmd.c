@@ -13,6 +13,7 @@ CMD cmd_table[] = {
     {"link",        &my_link},
     {"unlink",      &my_unlink},
     {"readlink",    &my_readlink},
+    {"mkdir",       &my_mkdir},
     {NULL,          NULL}
 };
 
