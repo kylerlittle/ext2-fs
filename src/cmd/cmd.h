@@ -14,6 +14,7 @@
 #include "level1/my_rmdir.h"
 #include "level1/my_creat.h"
 #include "level1/my_chown.h"
+#include "level1/my_chmod.h"
 #include <stdio.h>
 #include <string.h>
 

@@ -17,6 +17,7 @@ CMD cmd_table[] = {
     {"rmdir",       &my_rmdir},
     {"creat",       &my_creat},
     {"chown",       &my_chown},
+    {"chmod",       &my_chmod},
     {NULL,          NULL}
 };
 

@@ -42,7 +42,7 @@ int my_chown(int argc, char *argv[])
   chown_mip = iget(chown_dev, chown_ino);
 
   // Check if current running user has appropriate permissions
-  if (running->uid == new_uid || running->uid == 0) {
+  if (running->uid == chown_mip->INODE.i_uid || running->uid == 0) {
     chown_mip->INODE.i_uid = new_uid;
     chown_mip->dirty = 1;
   } else {
@@ -50,7 +50,7 @@ int my_chown(int argc, char *argv[])
     iput(chown_mip);
     return -1;
   }
-  if (running->gid == new_gid || running->gid == 0) {
+  if (running->gid == chown_mip->INODE.i_gid || running->gid == 0) {
     chown_mip->INODE.i_gid = new_gid;
     chown_mip->dirty = 1;
   } else {
