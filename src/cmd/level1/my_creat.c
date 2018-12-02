@@ -3,94 +3,93 @@
 int my_creat(int argc, char *argv[])
 {
 	int i, ino;
-	MINODE *pmip;
-	INODE *pip;
+	MINODE *parent_minodePtr;
+	INODE *parent_inodePtr;
 
-	char buf[1024];
-	char temp1[1024], temp2[1024];
-	char parent_name[1024], child_name[1024];
+	char buf[BLKSIZE];
+	char t1[BLKSIZE], t2[BLKSIZE];
+	char parent_name[BLKSIZE], child_name[BLKSIZE];
 
-	strcpy(temp1, argv[0]);
-	strcpy(temp2, argv[0]);
+	strcpy(t1, argv[0]);
+	strcpy(t2, argv[0]);
 
 	//get basename and dirname of argv[0]
-	strcpy(parent_name, dirname(temp1));
-	strcpy(child_name, basename(temp2));
+	strcpy(parent_name, dirname(t1));
+	strcpy(child_name, basename(t2));
 
 	//get ino of parent
 	ino = getino(running->cwd, parent_name);
 	//printf("%d\n", ino);
-	pmip = iget(dev, ino);
-	pip = &pmip->INODE;
+	parent_minodePtr = iget(dev, ino);
+	parent_inodePtr = &parent_minodePtr->INODE;
 
-	if(!pmip)
+	//check if the parent exists
+	if(!parent_minodePtr)
 	{
-		printf("ERROR: parent does not exist\n");
+		printf("ERROR: Parent does not exist\n");
 		return;
 	}
 
-	//check if dir
-	if(!S_ISDIR(pip->i_mode))
+	//check if directory
+	if(!S_ISDIR(parent_inodePtr->i_mode))
 	{
-		printf("ERROR: parent is not directory\n");
+		printf("ERROR: Parent is not a directory\n");
 		return;
 	}
 
-	//check if dir already exists
+	//check if dir exists
 	if(getino(running->cwd, argv[0]) != 0)
 	{
 		printf("ERROR: %s already exists\n", argv[0]);
 		return;
 	}
-
-	printf("running creat\n");
-	//time to work!
-	creat_child_under_pmip(pmip, child_name);
+	
+	creat_child_under_pmip(parent_minodePtr, child_name);
 
 	//size = 0, linkcount = 1, don't increment parent's links count
-	pip->i_atime = time(0L);
+	parent_inodePtr->i_atime = time(0L);
 
-	pmip->dirty = 1;
+	parent_minodePtr->dirty = 1;
 
-	iput(pmip);
+	iput(parent_minodePtr);
 
 	return;
 }
 
-int creat_child_under_pmip(MINODE *pmip, char *child_name)
+int creat_child_under_pmip(MINODE *parent_minodePtr, char *child_name)
 {
 	int i;
 	//allocate inode for new file
 	int ino = ialloc(dev);
 
 	//create it in memory
-	MINODE *mip = iget(dev, ino);
-	INODE *ip = &mip->INODE;
+	MINODE *minodePtr = iget(dev, ino);
+	INODE *inodePtr = &minodePtr->INODE;
 
-	//set the variables
-	ip->i_mode = 0x81A4; //file type
-	ip->i_uid  = running->uid; // Owner uid
-    ip->i_gid  = running->gid; // Group Id
-    ip->i_size = 0;	// Size in bytes
-    ip->i_links_count = 1; // Links to parent directory
-    ip->i_atime = time(0L); // Set to current time
-	ip->i_ctime = time(0L);
-	ip->i_mtime = time(0L);
+	//set the variables and do NOT incrememnt parents link count
+	inodePtr->i_mode = 0x81A4; //file type or 0100644 in mkdir_creat notes
+	inodePtr->i_uid  = running->uid; // Owner uid
+    inodePtr->i_gid  = running->gid; // Group Id
+    inodePtr->i_size = 0;	// Size in bytes-->no data block
+    inodePtr->i_links_count = 1; // # links to parent directory
+    inodePtr->i_atime = inodePtr->i_ctime=inodePtr->i_mtime = time(0L); // Set to current time
+	
+	
 
-	ip->i_blocks = 0;
+	inodePtr->i_blocks = 0;
 
 	//set data blocks to 0
 	for(i = 0; i < 15; i++)
 	{
-		ip->i_block[i] = 0;
+		inodePtr->i_block[i] = 0;
 	}
 
 	//mark dirty and write back
-	mip->dirty = 1;
-	iput(mip);
+	minodePtr->dirty = 1;
+	iput(minodePtr);
 
 	//enters new file's name in parent directory
-	enter_name(pmip, ino, child_name);//enter name defined in mkdir.c
+	enter_name(parent_minodePtr, ino, child_name);//enter name defined in mkdir.c
 
 	//return the ino
 	return ino;
