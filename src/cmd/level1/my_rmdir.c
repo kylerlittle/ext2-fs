@@ -18,7 +18,7 @@ int isEmpty(MINODE *minodePtr) //from page 338 in systems programming
     char name[64];
     DIR *dp;
 
-    if (ip->i_links_count > 2)
+    if (inodePtr->i_links_count > 2)
     {
         return 1;
     }
@@ -28,11 +28,11 @@ int isEmpty(MINODE *minodePtr) //from page 338 in systems programming
     //if the link count is 2, the DIR may have reg files
     //traverse DIRs data blocks to count dir entries
     //must be greater than 2
-    else if (ip->i_links_count == 2)
+    else if (inodePtr->i_links_count == 2)
     {
-        if (ip->i_block[1])
+        if (inodePtr->i_block[1])
         {
-            get_block(dev, ip->i_block[1], buf);
+            get_block(dev, inodePtr->i_block[1], buf);
             cp = buf;
             dp = (DIR *)buf;
             while (cp < buf + BLKSIZE)
@@ -59,8 +59,7 @@ void sw_kl_rmdir(char *path)
     int i=0;
     int ino;
     int parent_ino;
-    char temp[64];
-    char child[64];
+    char temp[64], child[64], parentname[MAX_FILENAME_LEN];
     MINODE *minodePtr;
     MINODE *parent_minodePtr;
     INODE *inodePtr;
@@ -73,6 +72,8 @@ void sw_kl_rmdir(char *path)
     }
     strcpy(temp, path);
     strcpy(child,basename(temp)); //gets the child
+    strcpy(parentname, dirname(temp));
+    if (parentname[0] == 0) strcpy(parentname, "/");
 
     ino=getino(running->cwd, path); //gets the minode
     printf("[path, ino]: [%s, %d]\n", path, ino);
@@ -83,12 +84,13 @@ void sw_kl_rmdir(char *path)
         printf("ERROR: The child does not exist\n");
         return;
     }
-
+    printf("hi\n");
     if(isEmpty(minodePtr)) //should work, checking if not empty
     {
         printf("ERROR: Directory is not empty\n");
         return;
     }
+    printf("hi213\n");
 
     if(!S_ISDIR(minodePtr->INODE.i_mode))
     {
@@ -100,12 +102,13 @@ void sw_kl_rmdir(char *path)
     
     findino(minodePtr,&ino);
     printf("ino: %d\n", ino);
+    parent_ino = getino(&dev, parentname);
     parent_minodePtr=iget(dev, parent_ino);
     parent_inodePtr=&parent_minodePtr->INODE;
     //deallocate blocks
-    for(;i<15&&inodePtr->i_block[i]!=0;i++)
+    for(i=0;i<15&&inodePtr->i_block[i]!=0;i++)
     {
-        bdealloc(dev, ip->i_block[i]);
+        bdealloc(dev, inodePtr->i_block[i]);
     }
     //now we need to deallocate inode
     /*when deallocating the inode, it clears the ino's
@@ -113,7 +116,9 @@ void sw_kl_rmdir(char *path)
     both the superblock and group descriptor by 1*/
 
     idealloc(dev, ino);
+    printf("before rmchild\n");
     rm_child(parent_minodePtr, child);
+    printf("post rmchild\n");
 
     //now we need to update the parent
     parent_inodePtr->i_links_count--;
