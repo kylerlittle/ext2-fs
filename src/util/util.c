@@ -377,110 +377,87 @@ int enter_name(MINODE *minodePtr, int ino, char *name)
     return 1;
 }
 
-void rmChild(MINODE *parent, char *name)
+//page 338
+void rm_child(MINODE *parent_minodePtr, char *name)
 {
-	int i;
-	INODE *p_ip = &parent->INODE;
-	DIR *dp;
-	DIR *prev_dp;
-	DIR *last_dp;
-	char buf[BLKSIZE];
-	char *cp;
-	char temp[64];
-	char *last_cp;
-	int start, end;
+    int i;
+    char buf[BLKSIZE];
+    char *cp;
+    char *final_cp;
+    int first;
+    int last;
+    char temp[64];
+    INODE *parent_inodePtr = &parent->INODE;
+    DIR *dp;
+    DIR *predecessor_dp;
+    DIR *start_dp; //for when we have to find the child, first or middle
 
-	printf("going to remove %s\n", name);
-	printf("parent size is %d\n", p_ip->i_size);
+    printf("Attempting to remove %s\n", name);
 
-	//iterate through blocks
-	for(i = 0; i < 12 ; i++)
-	{
-		if(p_ip->i_block[i] == 0)//empty block return
-			return;
+    for (i = 0; i < 12; i++)
+    {
+        if (parent_inodePtr->i_block[i] == 0)
+        {
+            return 0;
+        }
+        get_block(dev, parent_inodePtr->i_block[i], buf);
+        cp = buf;
+        dp = (DIR *)buf;
 
-		//load the block into buf
-		get_block(dev, p_ip->i_block[i], buf);
-		cp = buf;
-		dp = (DIR*)buf;
+        while (cp < buf + BLKSIZE) //traversal of entries
+        {
+            strncpy(temp, dp->name, dp->name_len);
+            temp[dp->name_len] = 0;
+            if (!strcmp(temp, name)) //found and first
+            {
+                printf("Child found\n");
+                if (cp == buf && cp + dp->rec_len == buf + BLKSIZE)
+                {
+                    free(buf);
+                    bdealloc(dev, ip->i_block[i]); //we are now deallocating the block
 
-		printf("dp at %s\n", dp->name);
+                    parent_inodePtr->i_size -= BLKSIZE;
+                    //shift left parents i_block page 340
+                    while (parent_inodePtr->i_block[i + 1] && i + 1 < 12)
+                    {
+                        i++;
+                        get_block(dev, parent_inodePtr->i_block[i], buf);
+                        put_block(dev, parent_inodePtr->i_block[i - 1], buf);
+                    }
+                }
+                else if (cp + dp->rec_len == buf + BLKSIZE) //last entry in block
+                {
+                    predecessor_dp->rec_len += dp->rec_len;
+                    put_block(dev, parent_inodePtr->i_block[i], buf);
+                }
+                else //the child is either the first or its in the middle
+                {    //but... theres stuff after child
+                    final_cp = buf;
+                    start_dp = (DIR *)buf;
 
-		//iterate through the entries
-		while(cp < buf + BLKSIZE)
-		{
-			strncpy(temp, dp->name, dp->name_len);
-			temp[dp->name_len] = 0;
+                    while (final_cp + start_dp->rec_len < buf + BLKSIZE)
+                    {
+                        final_cp += start_dp->rec_len; //add deleted rec_len to the last entry
+                        start_dp = (DIR *)final_cp;
+                    }
 
-			printf("dp is at %s\n", temp);
+                    start_dp->rec_len += dp->rec_len;
 
-			if(!strcmp(temp, name))//found it time to remove
-			{
-				printf("child found!\n");
-				if(cp == buf && cp + dp->rec_len == buf + BLKSIZE)
-				{
-					//it's the first and only entry, need to delete entire block
-					free(buf);
-					bdealloc(dev, ip->i_block[i]);  //deallocate block
-
-					p_ip->i_size -= BLKSIZE;
-
-					//shift blocks left
-					while(p_ip->i_block[i + 1] && i + 1 < 12)
-					{
-						i++;
-						get_block(dev, p_ip->i_block[i], buf);
-						put_block(dev, p_ip->i_block[i - 1], buf);
-					}
-				}
-				else if(cp + dp->rec_len == buf + BLKSIZE)
-				{
-					//just have to remove the last entry
-					printf("removing last entry\n");
-					prev_dp->rec_len += dp->rec_len;
-					put_block(dev, p_ip->i_block[i], buf);
-				}
-				else
-				{
-					//not last entry, this is where we have problems
-					//printf("Before dp is %s\n", dp->name);
-
-					last_dp = (DIR*)buf;
-					last_cp = buf;
-
-					//step into last entry
-					while(last_cp + last_dp->rec_len < buf + BLKSIZE)
-					{
-						//printf("last_dp at %s\n", last_dp->name);
-						last_cp += last_dp->rec_len;
-						last_dp = (DIR*)last_cp;
-					}
-
-					printf("%s and %s\n", dp->name, last_dp->name);
-
-					last_dp->rec_len += dp->rec_len;
-
-					start = cp + dp->rec_len;
-					end = buf + BLKSIZE;
-
-					memmove(cp, start, end - start);//built in function. move memory left
-
-					put_block(dev, p_ip->i_block[i], buf);
-
-				}
-
-				parent->dirty = 1;
-				iput(parent);
-				return;
-			}//end of child found
-
-			prev_dp = dp;
-			cp += dp->rec_len;
-			dp = (DIR*)cp;
-		}
-	}
-
-	return;
+                    first = cp + dp->rec_len; //add deleted rec_len to the last entry
+                    last = buf + BLKSIZE;
+                    memcpy(cp, start, end - start); //move all trailing entries left page 340
+                    put_block(dev, parent_inodePtr->i_block[i], buf);
+                }
+                parent_minodePtr->dirty = 1;
+                iput(parent_minodePtr); //releases a used minode pointed to by ptr
+                return;
+            }
+            predecessor_dp = dp;
+            cp += dp->rec_len;
+            dp = (DIR *)cp;
+        }
+    }
+    return;
 }
 
 int tst_bit(char *buf, int bit)
