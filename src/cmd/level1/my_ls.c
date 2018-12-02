@@ -57,6 +57,10 @@ int ls_file(MINODE *mip, char *name)
 
   // printf("%s", ss);
   printf("%8ld", mip->INODE.i_size);
+  char filetime[256];
+  strcpy(filetime, ctime(&mip->INODE.i_mtime));
+  filetime[strlen(filetime)-1] = 0; // kill '\n'
+  printf("  %s", filetime);
 
   printf("    %s", name);
 
@@ -75,7 +79,7 @@ int ls_dir(MINODE *mip)
 
   for (i = 0; i < 12; i++)
   { /* search direct blocks only */
-    printf("i_block[%d] = %d\n", i, mip->INODE.i_block[i]);
+    // printf("i_block[%d] = %d\n", i, mip->INODE.i_block[i]);
     if (mip->INODE.i_block[i] == 0)
       return 0;
 
