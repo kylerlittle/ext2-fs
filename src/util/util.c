@@ -299,74 +299,82 @@ int findino(MINODE *mip, u32 *myino)
   return dp->inode;
 }
 
-int enter_name(MINODE* mip, int myino, char* myname)
+//refer to page 334 for enter name function in system programming (4(4))
+int enter_name(MINODE *minodePtr, int ino, char *name)
 {
-  int i;
-	INODE *parent_ip = &mip->INODE;
+    int i=0;
+    INODE *parent_inodePtr;
+    parent_inodePtr = &minodePtr->INODE;
+    char buf[BLKSIZE]; 
+    char *cp;
+    DIR *dp;
+    int bno = 0;
+    int need_length = 0;
+    int ideal_length = 0;
+    int remain;
+    //can assume only 12 direct blocks
+    for (; i < parent_inodePtr->i_size / BLKSIZE; i++)
+    {
+        if (parent_inodePtr->i_block[i] == 0) //page 334
+        {
+            break;
+        }
+        bno = parent_inodePtr->i_block[i];
+        get_block(dev, bno, buf);
+        dp = (DIR *)buf;
+        cp = buf;
 
-	char buf[BLKSIZE];
-	char *cp;
-	DIR *dp;
+        //need length from page 335
+        //all dir entries rec_len=ideal length except the last entry
+        //the rec_length of the last entry may be longer than the ideal length
 
-	int need_len = 0, ideal = 0, remain = 0;
-	int bno = 0, block_size = BLKSIZE;
+        need_length = 4 * ((8 + strlen(name) + 3) / 4); //->proves its a multiple of 4
+        printf("need_length: %d\n", need_length);
+        while (cp + dp->rec_len < buf + BLKSIZE)
+        {
+            cp += dp->rec_len; //rec_length is 12?? last block
+            dp = (DIR *)cp;
+        }
+        //now we are at the last block
+        printf("last_entry: %s\n", dp->name);
+        cp = (char *)dp;
 
-	//go through parent data blocks
-	for(i = 0; i < parent_ip->i_size / BLKSIZE; i++)
-	{
-		if(parent_ip->i_block[i] == 0)
-			break;//empty data block, break
+        //we handle this later, the last entry may not be the ideal length, we will trim it below
+        ideal_length = 4 * ((8 + dp->name_len + 3) / 4);
 
-		//get bno to use in get_block
-		bno = parent_ip->i_block[i];
+        //now whats remaining is remain which is the last entry rec_len-ideal_length
+        remain = dp->rec_len - ideal_length;
+        printf("remain: %d\n", remain);
+        if (remain >= need_length)
+        {
+            //we need to trim it to its ideal length
+            dp->rec_len = ideal_length;
+            cp += dp->rec_len;
+            dp = (DIR *)cp;
 
-		get_block(dev, bno, buf);
+            dp->inode = ino;
+            dp->rec_len = 1024 - ((u32)cp - (u32)buf);
+            printf("rec_len: %d\n", dp->rec_len);
+            dp->name_len = strlen(name);
+            dp->file_type = EXT2_FT_DIR; //this is 2, and indicates directory file
+            strcpy(dp->name, name);
+            //writes
+            put_block(dev, bno, buf);
+            return 1;
+        }
+    }
 
-		dp = (DIR*)buf;
-		cp = buf;
+    printf("Number of Data Blocks: %d\n", i);
+    
+    dp->inode=ino;
+    dp->rec_len=BLKSIZE; //again BLKSIZE is 1024 macro defined
+    dp->name_len=strlen(name);
+    dp->file_type=EXT2_FT_DIR; //this is 2, and indicates directory file
+    strcpy(dp->name, name);
 
-		//need length
-		need_len = 4 * ( (8 + strlen(myname) + 3) / 4);
-		printf("need len is %d\n", need_len);
-
-		//step into last dir entry
-		while(cp + dp->rec_len < buf + BLKSIZE)
-		{
-			cp += dp->rec_len;
-			dp = (DIR*)cp;
-		}
-
-		printf("last entry is %s\n", dp->name);
-		cp = (char*)dp;
-
-		//ideal length uses name len of last dir entry
-		ideal = 4 * ( (8 + dp->name_len + 3) / 4);
-
-		//let remain = last entry's rec_len - its ideal length
-		remain = dp->rec_len - ideal;
-		printf("remain is %d\n", remain);
-
-
-		if(remain >= need_len)
-		{
-			//enter the new entry as the last entry and trim the previous entry to its ideal length
-			dp->rec_len = ideal;
-
-			cp += dp->rec_len;
-			dp = (DIR*)cp;
-
-			dp->inode = myino;
-			dp->rec_len = block_size - ((u32)cp - (u32)buf);
-			printf("rec len is %d\n", dp->rec_len);
-			dp->name_len = strlen(myname);
-			dp->file_type = EXT2_FT_DIR;
-			strcpy(dp->name, myname);
-
-			put_block(dev, bno, buf);
-
-			return 1;
-		}
-	}
+    //now we write back, but we have updated all variables
+    put_block(dev, bno, buf);
+    return 1;
 }
 
 void rmChild(MINODE *parent, char *name)
@@ -521,7 +529,7 @@ int incFreeInodes(int dev)
   // dec free inodes count in SUPER and GD
   get_block(dev, 1, buf);
   sp = (SUPER *)buf;
-  sp->s_free_inodes_count--;
+  sp->s_free_inodes_count++;
   put_block(dev, 1, buf);
 
   get_block(dev, 2, buf);
@@ -553,7 +561,7 @@ int ialloc(int dev)
 }
 
 /* Deallocate inode on device. */
-int idalloc(int dev, int ino) {
+int idealloc(int dev, int ino) {
   char buf[BLKSIZE];
   // get inode bitmap block
   get_block(dev, imap, buf);
@@ -562,6 +570,38 @@ int idalloc(int dev, int ino) {
   put_block(dev, imap, buf);
   // update free inode count in SUPER and GD
   incFreeInodes(dev);
+}
+
+int decFreeDataBlocks(int dev)
+{
+  char buf[BLKSIZE];
+
+  // dec free inodes count in SUPER and GD
+  get_block(dev, 1, buf);
+  sp = (SUPER *)buf;
+  sp->s_free_blocks_count--;
+  put_block(dev, 1, buf);
+
+  get_block(dev, 2, buf);
+  gp = (GD *)buf;
+  gp->bg_free_blocks_count--;
+  put_block(dev, 2, buf);
+}
+
+int incFreeDataBlocks(int dev)
+{
+  char buf[BLKSIZE];
+
+  // dec free inodes count in SUPER and GD
+  get_block(dev, 1, buf);
+  sp = (SUPER *)buf;
+  sp->s_free_blocks_count++;
+  put_block(dev, 1, buf);
+
+  get_block(dev, 2, buf);
+  gp = (GD *)buf;
+  gp->bg_free_blocks_count++;
+  put_block(dev, 2, buf);
 }
 
 /* Allocate data block on dev. In other words, on device dev,
@@ -577,7 +617,7 @@ int balloc(int dev)
   for (i=0; i < nblocks; i++){
     if (tst_bit(buf, i)==0){
        set_bit(buf,i);
-       decFreeInodes(dev);
+       decFreeDataBlocks(dev);
 
        put_block(dev, bmap, buf);
 
@@ -588,8 +628,8 @@ int balloc(int dev)
   return 0;
 }
 
-/* Deallocate dnode on device. */
-int bdalloc(int dev, int ino) {
+/* Deallocate data block number ino on dev. */
+int bdealloc(int dev, int ino) {
   char buf[BLKSIZE];
   // get inode bitmap block
   get_block(dev, bmap, buf);
@@ -597,7 +637,7 @@ int bdalloc(int dev, int ino) {
   // write buf back
   put_block(dev, bmap, buf);
   // update free inode count in SUPER and GD
-  incFreeInodes(dev);
+  incFreeDataBlocks(dev);
 }
 
 /* Remove all of mip->INODE's data blocks! Then iput back to disc. */
