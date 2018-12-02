@@ -410,7 +410,7 @@ void rm_child(MINODE *parent_minodePtr, char *name)
             temp[dp->name_len] = 0;
             if (!strcmp(temp, name)) //found and first
             {
-                printf("Child found\n");
+                printf("rm_child: child found\n");
                 if (cp == buf && cp + dp->rec_len == buf + BLKSIZE)
                 {
                     free(buf);
@@ -420,9 +420,9 @@ void rm_child(MINODE *parent_minodePtr, char *name)
                     //shift left parents i_block page 340
                     while (parent_inodePtr->i_block[i + 1] && i + 1 < 12)
                     {
-                        i++;
                         get_block(dev, parent_inodePtr->i_block[i], buf);
                         put_block(dev, parent_inodePtr->i_block[i - 1], buf);
+                        i++;
                     }
                 }
                 else if (cp + dp->rec_len == buf + BLKSIZE) //last entry in block
@@ -620,7 +620,8 @@ int bdealloc(int dev, int ino) {
 /* Remove all of mip->INODE's data blocks! Then iput back to disc. */
 int truncate(MINODE *mip) {
   printf("truncate: deallocating direct block numbers\n");
-  int i;
+  int i = 0;
+  INODE *ip = &mip->INODE;
   char buf[BLKSIZE], indirect_buf[BLKSIZE];
   for (i=0; i < 15; ++i) {
       if (ip->i_block[i] == 0) break;

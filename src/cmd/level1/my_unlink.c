@@ -53,6 +53,7 @@ int my_unlink(int argc, char *argv[])
   // check directory of argv[0] exists and is a DIR
   char parent_dir[MAX_FILENAME_LEN], link_child[MAX_FILENAME_LEN];
   strcpy(parent_dir, dirname(argv[0]));
+  if (parent_dir[0] == 0) strcpy(parent_dir, "/");
   strcpy(link_child, basename(argv[0]));
   printf("my_unlink: parent_dir is %s; child to unlink is %s\n", parent_dir, link_child);
 
