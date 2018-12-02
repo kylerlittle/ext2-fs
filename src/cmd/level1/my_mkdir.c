@@ -87,7 +87,7 @@ int sw_kl_mkdir(MINODE *parent_minodePtr, char *child)
     inodePtr->i_gid=running->gid; //group id
     inodePtr->i_size=BLKSIZE; //size in bytes
     inodePtr->i_links_count=2; //links count is 2 you have . and ..
-    inodePtr->i_atime=ip->i_ctime=ip->i_mtime=time(0L);
+    inodePtr->i_atime=inodePtr->i_ctime=inodePtr->i_mtime=time(0L);
     inodePtr->i_blocks=2; //block count in 512 byte chunks
     inodePtr->i_block[0]=bno; //the new directory has one data block
     for (int i=1;i<15;i++)
