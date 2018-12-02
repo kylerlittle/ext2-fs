@@ -70,7 +70,7 @@ int my_unlink(int argc, char *argv[])
   // If we made it here, we are safe to attempt removing the link now; first decrement link count
   link_mip->INODE.i_links_count--;
   // Remove link_child (which is basename(argv[0])) from directory INODE data block
-  rmChild(parent_mip, link_child);
+  rm_child(parent_mip, link_child);
 
   // parent mip is modified, so mark as dirty and write back to disc
   parent_mip->dirty = 1;

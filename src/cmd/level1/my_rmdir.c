@@ -5,7 +5,7 @@
 int my_rmdir(int argc, char*argv[])
 {
     //argv[0]
-    rm_dir(argv[0]);
+    sw_kl_rmdir(argv[0]);
     
 
 }
