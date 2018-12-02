@@ -130,6 +130,8 @@ int sw_kl_mkdir(MINODE *parent_minodePtr, char *child)
     //write to block on disk
     put_block(dev,bno,buf);
     enter_name(parent_minodePtr, ino, child); //puts into the parents directory
+    parent_minodePtr->dirty = 1;
+    iput(parent_minodePtr);
     return 1;
 
 }

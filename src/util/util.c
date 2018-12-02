@@ -313,7 +313,10 @@ int enter_name(MINODE *minodePtr, int ino, char *name)
     int ideal_length = 0;
     int remain;
     //can assume only 12 direct blocks
-    for (; i < parent_inodePtr->i_size / BLKSIZE; i++)
+    int j;
+    for (j=0; j <12 && parent_inodePtr->i_block[j] != 0;j++);
+    int last_entry_in_data_block = j-1;
+    for (i=last_entry_in_data_block; i < parent_inodePtr->i_size / BLKSIZE; i++)
     {
         if (parent_inodePtr->i_block[i] == 0) //page 334
         {

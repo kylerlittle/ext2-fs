@@ -30,9 +30,10 @@ int isEmpty(MINODE *minodePtr) //from page 338 in systems programming
     //must be greater than 2
     else if (inodePtr->i_links_count == 2)
     { //need to know fi the number of dir entries is > 2
-        if (inodePtr->i_block[1])
+        if (inodePtr->i_block[0])
         {
-            get_block(dev, inodePtr->i_block[1], buf);
+            printf("dsfksjadfldsj inside\n");
+            get_block(dev, inodePtr->i_block[0], buf);
             cp = buf;
             dp = (DIR *)buf;
             while (cp < buf + BLKSIZE)
@@ -40,12 +41,19 @@ int isEmpty(MINODE *minodePtr) //from page 338 in systems programming
                 strncpy(name, dp->name, dp->name_len); //for n in strncpy
                 name[dp->name_len] = 0;
 
-                if (strcmp(name, ".") != 0 && strcmp(name, "..") != 0)
+                if (name[0]==0) break;
+                
+                // name can be ".." or name can be "."; if not return -1
+                if (!(strcmp(name, ".") == 0 || strcmp(name, "..") == 0))
                 {
+                    printf("isEmpty: %s is not . or ..\n", name);
                     //if the name is not . or .., then there is a sub file, need to check
                     return 1;
                 }
+                cp += dp->rec_len;
+                dp = (DIR *)cp;
             }
+            return 0;
         }
         else
         {
@@ -86,20 +94,19 @@ void sw_kl_rmdir(char *path)
     if(!minodePtr) //the minodePtr isn't pointing anywhere
     {
         printf("ERROR: The child does not exist\n");
-        return;
+        return -1;
     }
-    printf("hi\n");
-    if(isEmpty(minodePtr)) //should work, checking if not empty
-    {
-        printf("ERROR: Directory is not empty\n");
-        return;
-    }
-    //printf("hi213\n");
 
     if(!S_ISDIR(minodePtr->INODE.i_mode))
     {
         printf("ERROR: %s is not a directory\n", path);
-        return;
+        return -1;
+    }
+
+    if(isEmpty(minodePtr)) //should work, checking if not empty
+    {
+        printf("ERROR: Directory is not empty\n");
+        return -1;
     }
 
     //going to begin to remove
@@ -137,5 +144,5 @@ void sw_kl_rmdir(char *path)
     minodePtr->dirty=1;
     iput(minodePtr);
 
-    return;
+    return 0;
 }

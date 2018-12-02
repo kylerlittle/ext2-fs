@@ -1,5 +1,5 @@
-#ifndef __LS__
-#define __LS__
+#ifndef __STAT__
+#define __STAT__
 
 /**** Included headers/libraries ****/
 #include "../../util/util.h"
@@ -16,7 +16,6 @@ extern int nblocks, ninodes, bmap, imap, inode_start;
 extern char line[MAX_INPUT_LEN], cmd[32], pathname[MAX_FILENAME_LEN];
 
 /**** Function Prototypes ****/
-int stat_file(MINODE *mip, char *name);
-int my_ls(int argc, char *argv[]);
+int my_stat(int argc, char *argv[]);
 
 #endif

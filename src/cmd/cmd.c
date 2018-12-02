@@ -19,6 +19,7 @@ CMD cmd_table[] = {
     {"chown",       &my_chown},
     {"chmod",       &my_chmod},
     {"touch",       &my_touch},
+    {"stat",        &my_stat},
     {NULL,          NULL}
 };
 
