@@ -1,7 +1,6 @@
-#include "commands.h"
+#include "my_creat.h"
 
-
-void create_file(char path[124])
+int my_creat(int argc, char *argv[])
 {
 	int i, ino;
 	MINODE *pmip;
@@ -11,10 +10,10 @@ void create_file(char path[124])
 	char temp1[1024], temp2[1024];
 	char parent_name[1024], child_name[1024];
 
-	strcpy(temp1, path);
-	strcpy(temp2, path);
+	strcpy(temp1, argv[0]);
+	strcpy(temp2, argv[0]);
 
-	//get basename and dirname of path
+	//get basename and dirname of argv[0]
 	strcpy(parent_name, dirname(temp1));
 	strcpy(child_name, basename(temp2));
 
@@ -38,15 +37,15 @@ void create_file(char path[124])
 	}
 
 	//check if dir already exists
-	if(getino(running->cwd, path) != 0)
+	if(getino(running->cwd, argv[0]) != 0)
 	{
-		printf("ERROR: %s already exists\n", path);
+		printf("ERROR: %s already exists\n", argv[0]);
 		return;
 	}
 
 	printf("running creat\n");
 	//time to work!
-	my_creat(pmip, child_name);
+	creat_child_under_pmip(pmip, child_name);
 
 	//size = 0, linkcount = 1, don't increment parent's links count
 	pip->i_atime = time(0L);
@@ -58,7 +57,7 @@ void create_file(char path[124])
 	return;
 }
 
-int my_creat(MINODE *pmip, char *child_name)
+int creat_child_under_pmip(MINODE *pmip, char *child_name)
 {
 	int i;
 	//allocate inode for new file

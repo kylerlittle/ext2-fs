@@ -8,9 +8,11 @@
 #include "level1/my_pwd.h"
 #include "level1/my_chdir.h"
 #include "level1/my_link.h"
+#include "level1/my_symlink.h"
 #include "level1/my_unlink.h"
 #include "level1/my_mkdir.h"
 #include "level1/my_rmdir.h"
+#include "level1/my_creat.h"
 #include <stdio.h>
 #include <string.h>
 

@@ -11,9 +11,11 @@ CMD cmd_table[] = {
     {"pwd",         &my_pwd},
     {"cd",          &my_chdir},
     {"link",        &my_link},
+    {"symlink",     &my_symlink},
     {"unlink",      &my_unlink},
     {"mkdir",       &my_mkdir},
     {"rmdir",       &my_rmdir},
+    {"creat",       &my_creat},
     {NULL,          NULL}
 };
 
