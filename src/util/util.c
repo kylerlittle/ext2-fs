@@ -554,7 +554,14 @@ int ialloc(int dev)
 
 /* Deallocate inode on device. */
 int idalloc(int dev, int ino) {
-
+  char buf[BLKSIZE];
+  // get inode bitmap block
+  get_block(dev, imap, buf);
+  clr_bit(buf, ino-1);
+  // write buf back
+  put_block(dev, imap, buf);
+  // update free inode count in SUPER and GD
+  incFreeInodes(dev);
 }
 
 /* Allocate data block on dev. In other words, on device dev,
@@ -581,9 +588,16 @@ int balloc(int dev)
   return 0;
 }
 
-// int bdealloc
-int bdealloc(int dev, int ino) {
-
+/* Deallocate dnode on device. */
+int bdalloc(int dev, int ino) {
+  char buf[BLKSIZE];
+  // get inode bitmap block
+  get_block(dev, bmap, buf);
+  clr_bit(buf, ino-1);
+  // write buf back
+  put_block(dev, bmap, buf);
+  // update free inode count in SUPER and GD
+  incFreeInodes(dev);
 }
 
 /* Remove all of mip->INODE's data blocks! Then iput back to disc. */
