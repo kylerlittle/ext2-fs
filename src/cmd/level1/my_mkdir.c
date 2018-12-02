@@ -1,14 +1,25 @@
-
 #include "my_mkdir.h"
 
+/**** globals defined in main.c file ****/
+MINODE minode[NMINODE];
+MINODE *root;
+PROC   proc[NPROC], *running;
+char gpath[MAX_FILENAME_LEN];
+char *name[MAX_COMPONENTS];
+int n;
+int fd, dev;
+int nblocks, ninodes, bmap, imap, inode_start;
+char line[MAX_INPUT_LEN], cmd[32], pathname[MAX_FILENAME_LEN];
 
+/* Mimic linux mkdir; if passed multiple args, remove all. */
 int my_mkdir(int argc, char*argv[])
 {
-    //argv[0]
-    mk_dir(argv[0]);
-    
-
+    int i;
+    for (i=0; i < argc; i++) {
+        mk_dir(argv[i]);
+    }
 }
+
 //THIS ENTIRE FUNCTION IS EXPLAINED IN PAGE 332
 void mk_dir(char path[MAX_FILENAME_LEN])
 {
@@ -20,7 +31,7 @@ void mk_dir(char path[MAX_FILENAME_LEN])
     char t1[BLKSIZE];
     char t2[BLKSIZE];
     char parent[BLKSIZE];
-    char child[1024];
+    char child[BLKSIZE];
 
     strcpy(t1, path); //holds the pathname for us
     strcpy(t2, path);

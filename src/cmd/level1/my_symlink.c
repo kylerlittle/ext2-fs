@@ -91,7 +91,7 @@ int my_symlink(int argc, char *argv[])
   new_mip->dirty = 1;
   // Copy name of argv[0] (i.e. file we're trying to make link for) into i_block of new inode
   // since i_block is array of size 15 ints, it can maximally store 60 chars... so just copy first 60 chars of argv[0]
-  strncpy(new_mip->INODE.i_block, argv[0], 60);
+  strncpy((char *)new_mip->INODE.i_block, argv[0], 60);
   new_mip->INODE.i_size = strlen(argv[0]);
   iput(new_mip);
   
