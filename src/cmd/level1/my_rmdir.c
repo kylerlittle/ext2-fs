@@ -95,6 +95,7 @@ void sw_kl_rmdir(char *path)
     if(!S_ISDIR(minodePtr->INODE.i_mode))
     {
         printf("ERROR: %s is not a directory\n", path);
+        return;
     }
 
     //going to begin to remove
