@@ -29,7 +29,7 @@ int isEmpty(MINODE *minodePtr) //from page 338 in systems programming
     //traverse DIRs data blocks to count dir entries
     //must be greater than 2
     else if (inodePtr->i_links_count == 2)
-    {
+    { //need to know fi the number of dir entries is > 2
         if (inodePtr->i_block[1])
         {
             get_block(dev, inodePtr->i_block[1], buf);
@@ -42,10 +42,14 @@ int isEmpty(MINODE *minodePtr) //from page 338 in systems programming
 
                 if (strcmp(name, ".") != 0 && strcmp(name, "..") != 0)
                 {
-                    //if the name is not . or .., then there is a subdir, need to check
+                    //if the name is not . or .., then there is a sub file, need to check
                     return 1;
                 }
             }
+        }
+        else
+        {
+            return 0;
         }
     }
     else
@@ -90,7 +94,7 @@ void sw_kl_rmdir(char *path)
         printf("ERROR: Directory is not empty\n");
         return;
     }
-    printf("hi213\n");
+    //printf("hi213\n");
 
     if(!S_ISDIR(minodePtr->INODE.i_mode))
     {
