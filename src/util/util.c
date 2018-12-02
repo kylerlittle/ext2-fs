@@ -413,7 +413,7 @@ void rmChild(MINODE *parent, char *name)
 				{
 					//it's the first and only entry, need to delete entire block
 					free(buf);
-					bdealloc(dev, ip->i_block[i]);//deallocate block
+					bdealloc(dev, ip->i_block[i]);  //deallocate block
 
 					p_ip->i_size -= BLKSIZE;
 
@@ -552,12 +552,19 @@ int ialloc(int dev)
   return 0;
 }
 
+/* Deallocate inode on device. */
+int idalloc(int dev, int ino) {
+
+}
+
+/* Allocate data block on dev. In other words, on device dev,
+write to datablock bitmap that we added a data block. */
 int balloc(int dev)
 {
   int  i;
   char buf[BLKSIZE];
 
-  // read inode_bitmap block
+  // read datablock_bitmap block
   get_block(dev, bmap, buf);
 
   for (i=0; i < nblocks; i++){
@@ -574,31 +581,40 @@ int balloc(int dev)
   return 0;
 }
 
+// int bdealloc
+int bdealloc(int dev, int ino) {
+
+}
+
 /* Remove all of mip->INODE's data blocks! Then iput back to disc. */
 int truncate(MINODE *mip) {
-  printf("DIRECT BLOCK NUMBERS:\n");
+  printf("truncate: deallocating direct block numbers\n");
   int i;
   char buf[BLKSIZE], indirect_buf[BLKSIZE];
   for (i=0; i < 15; ++i) {
       if (ip->i_block[i] == 0) break;
       printf("i_block[%d] = %d\n", i, ip->i_block[i]);
-      // remove this
+      // remove direct block now
+      bdealloc(mip->dev, mip->INODE.i_block[i]);
       ip->i_block[i] = 0;
   }
   if (i >= 12) {
-      printf("INDIRECT BLOCK NUMBERS:\n");
+      printf("truncate: deallocating indirect block numbers\n");
       get_block(dev, ip->i_block[12], buf);
       int * int_p = (int *)buf, counter = 0;
       while (counter < BLKSIZE / sizeof(int)) {
           if (*int_p == 0) break;
           printf("%d  ", *int_p);
-          // remove this
+          // remove indirect block now
+          bdealloc(mip->dev, *int_p);
+          *int_p = 0;  // set it to 0 now since it's been deallocated
           int_p++; counter++;
       }
   }
+  bdealloc(mip->dev, mip->INODE.i_block[12]);
   ip->i_block[12] = 0; // clear this
   if (i >= 13) {
-      printf("\nDOUBLE INDIRECT BLOCK NUMBERS:\n");
+      printf("truncate: deallocating double indirect block numbers\n");
       get_block(dev, ip->i_block[13], buf);
       int * int_p = (int *)buf, counter = 0;
       while (counter < BLKSIZE / sizeof(int)) {
@@ -608,12 +624,15 @@ int truncate(MINODE *mip) {
           while (i_counter < BLKSIZE / sizeof(int)) {
               if (*double_int_p == 0) break;
               printf("%d  ", *double_int_p);
-              // remove this
+              // remove double indirect block now
+              bdealloc(mip->dev, *double_int_p);
+              *double_int_p = 0;  // set it to 0 now since it's been deallocated
               double_int_p++; i_counter++;
           }
           int_p++; counter++;
       }
       printf("\n");
   }
+  bdealloc(mip->dev, mip->INODE.i_block[13]);
   ip->i_block[13] = 0; // clear this
 }
