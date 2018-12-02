@@ -75,3 +75,7 @@ void rm_child(MINODE *parent_minodePtr, char *name)
     }
 
 }
+
+int my_rmdir(int argc, char *argv[]) {
+    
+}

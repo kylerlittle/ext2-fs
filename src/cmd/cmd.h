@@ -10,6 +10,7 @@
 #include "level1/my_link.h"
 #include "level1/my_unlink.h"
 #include "level1/my_mkdir.h"
+#include "level1/my_rmdir.h"
 #include <stdio.h>
 #include <string.h>
 
