@@ -20,7 +20,7 @@ void mk_dir(char path[MAX_FILENAME_LEN])
     char t1[BLKSIZE];
     char t2[BLKSIZE];
     char parent[BLKSIZE];
-    char child[1024];
+    char child[BLKSIZE];
 
     strcpy(t1, path); //holds the pathname for us
     strcpy(t2, path);
@@ -70,8 +70,7 @@ void mk_dir(char path[MAX_FILENAME_LEN])
 int enter_name(MINODE *minodePtr, int ino, char *name)
 {
     int i=0;
-    INODE *parent_inodePtr;
-    parent_inodePtr = &minodePtr->INODE;
+    INODE *parent_inodePtr=&minodePtr->INODE;
     char buf[BLKSIZE]; 
     char *cp;
     DIR *dp;
@@ -80,7 +79,7 @@ int enter_name(MINODE *minodePtr, int ino, char *name)
     int ideal_length = 0;
     int remain;
     //can assume only 12 direct blocks
-    for (; i < parent_inodePtr->i_size / BLKSIZE; i++)
+    for (i; i < parent_inodePtr->i_size / BLKSIZE; i++)
     {
         if (parent_inodePtr->i_block[i] == 0) //page 334
         {
