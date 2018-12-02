@@ -29,7 +29,7 @@ int getino(int *dev, char *pathname);
 int findmyname(MINODE *parent, u32 myino, char *myname);
 int findino(MINODE *mip, u32 *myino);
 int enter_name(MINODE *minodePtr, int ino, char *name);
-void rmChild(MINODE *parent, char *name);
+void rm_child(MINODE *parent_minodePtr, char *name);
 int tst_bit(char *buf, int bit);
 int set_bit(char *buf, int bit);
 int clr_bit(char *buf, int bit);
