@@ -387,7 +387,7 @@ void rm_child(MINODE *parent_minodePtr, char *name)
     int first;
     int last;
     char temp[64];
-    INODE *parent_inodePtr = &parent->INODE;
+    INODE *parent_inodePtr = &parent_minodePtr->INODE;
     DIR *dp;
     DIR *predecessor_dp;
     DIR *start_dp; //for when we have to find the child, first or middle
@@ -445,7 +445,7 @@ void rm_child(MINODE *parent_minodePtr, char *name)
 
                     first = cp + dp->rec_len; //add deleted rec_len to the last entry
                     last = buf + BLKSIZE;
-                    memcpy(cp, start, end - start); //move all trailing entries left page 340
+                    memcpy(cp, first, last - first); //move all trailing entries left page 340
                     put_block(dev, parent_inodePtr->i_block[i], buf);
                 }
                 parent_minodePtr->dirty = 1;

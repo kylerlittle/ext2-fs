@@ -98,8 +98,8 @@ void sw_kl_rmdir(char *path)
     //going to begin to remove
     inodePtr=&minodePtr->INODE;
     
-    findino(minodePtr,&ino, &parent_ino);
-    printf("ino: %d \t parent_ino: %d\n", ino,parent_ino);
+    findino(minodePtr,&ino);
+    printf("ino: %d\n", ino);
     parent_minodePtr=iget(dev, parent_ino);
     parent_inodePtr=&parent_minodePtr->INODE;
     //deallocate blocks
@@ -125,7 +125,7 @@ void sw_kl_rmdir(char *path)
 
     //update deleted directory in disk
     minodePtr->dirty=1;
-    iput(mip);
+    iput(minodePtr);
 
     return;
 }
