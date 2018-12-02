@@ -30,6 +30,15 @@ int findmyname(MINODE *parent, u32 myino, char *myname);
 int findino(MINODE *mip, u32 *myino);
 int enter_name(MINODE* mip, int myino, char* myname);
 void rmChild(MINODE *parent, char *name);
+int tst_bit(char *buf, int bit);
+int set_bit(char *buf, int bit);
+int clr_bit(char *buf, int bit);
+int decFreeInodes(int dev);
+int incFreeInodes(int dev);
+int ialloc(int dev);
+int idealloc(int dev, int ino);
+int balloc(int dev);
+int bdealloc(int dev, int ino);
 int truncate(MINODE *mip);
 
 #endif

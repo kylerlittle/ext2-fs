@@ -12,7 +12,6 @@ CMD cmd_table[] = {
     {"cd",          &my_chdir},
     {"link",        &my_link},
     {"unlink",      &my_unlink},
-    {"readlink",    &my_readlink},
     {"mkdir",       &my_mkdir},
     {NULL,          NULL}
 };
