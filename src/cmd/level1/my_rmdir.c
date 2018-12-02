@@ -32,7 +32,7 @@ int isEmpty(MINODE *minodePtr) //from page 338 in systems programming
     { //need to know fi the number of dir entries is > 2
         if (inodePtr->i_block[0])
         {
-            printf("dsfksjadfldsj inside\n");
+            //printf("dsfksjadfldsj inside\n");
             get_block(dev, inodePtr->i_block[0], buf);
             cp = buf;
             dp = (DIR *)buf;
@@ -46,7 +46,7 @@ int isEmpty(MINODE *minodePtr) //from page 338 in systems programming
                 // name can be ".." or name can be "."; if not return -1
                 if (!(strcmp(name, ".") == 0 || strcmp(name, "..") == 0))
                 {
-                    printf("isEmpty: %s is not . or ..\n", name);
+                    //printf("isEmpty: %s is not . or ..\n", name);
                     //if the name is not . or .., then there is a sub file, need to check
                     return 1;
                 }
@@ -128,9 +128,9 @@ void sw_kl_rmdir(char *path)
     both the superblock and group descriptor by 1*/
 
     idealloc(dev, ino);
-    printf("before rmchild\n");
+    
     rm_child(parent_minodePtr, child);
-    printf("post rmchild\n");
+    
 
     //now we need to update the parent
     parent_inodePtr->i_links_count--;

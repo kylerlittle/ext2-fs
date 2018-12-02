@@ -20,6 +20,7 @@ CMD cmd_table[] = {
     {"chmod",       &my_chmod},
     {"touch",       &my_touch},
     {"stat",        &my_stat},
+    {"pfd",         &my_pfd},
     {NULL,          NULL}
 };
 

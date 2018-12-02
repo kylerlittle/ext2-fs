@@ -69,6 +69,8 @@ typedef struct oft{
   int  offset;
 }OFT;
 
+OFT oft[NOFT]; //page 321
+
 typedef struct proc{
   struct proc *next;
   int          pid;
