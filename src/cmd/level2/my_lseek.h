@@ -5,6 +5,6 @@
 
 
 int my_lseek(int argc, char*argv[]);
-int sw_kl_lseek(char *pathname[]);
+int sw_kl_lseek(int fd, int position);
 
 #endif
