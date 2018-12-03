@@ -113,6 +113,8 @@ int sw_kl_write(int fd, char buf[], int nbytes) {
 				int *ip = (int*)ibuf, p=0;  // step thru block in chunks of sizeof(int), set each ptr to 0
 				for (p=0; p<BLKSIZE/sizeof(int);p++) ip[p] = 0;
 				put_block(mip->dev, mip->INODE.i_block[12], ibuf); // write back to disc
+				// increment iblock count
+				mip->INODE.i_blocks++;
 			}
 			// get i_block[12] into an int ibuf[256];
 			memset(ibuf, '\0', BLKSIZE);  // this is 1024 bytes, but only use first 256
@@ -121,12 +123,56 @@ int sw_kl_write(int fd, char buf[], int nbytes) {
 			if (blk==0){
 				// allocate a disk block;
 				blk = ibuf[blk] = balloc(mip->dev);
+				// increment iblock count
+				mip->INODE.i_blocks++;
 			}
 			// record it in i_block[12];
 			put_block(mip->dev, mip->INODE.i_block[12], ibuf); // write back to disc
 		}
-		else {
-			// double indirect blocks */
+		else { // double indirect blocks
+			// First check if we even have the ptr array to keep track of double indirect blocks; if not, allocate block
+			if (mip->INODE.i_block[13] == 0) {  // ONLY IF FIRST DOUBLE INDIRECT BLOCK ALLOCATION
+				// allocate a block for it;
+				mip->INODE.i_block[13] = balloc(mip->dev);
+				// zero out the block on disk !!!!
+				get_block(mip->dev, mip->INODE.i_block[13], ibuf);
+				int *ip = (int*)ibuf, p=0;  // step thru block in chunks of sizeof(int), set each ptr to 0
+				for (p=0; p<BLKSIZE/sizeof(int);p++) ip[p] = 0;
+				put_block(mip->dev, mip->INODE.i_block[13], ibuf); // write back to disc
+				// increment iblock count
+				mip->INODE.i_blocks++;
+			}
+			// get i_block[13] into an int ibuf[256];
+			memset(ibuf, '\0', BLKSIZE);  // this is 1024 bytes, but only use first 256
+			get_block(mip->dev, mip->INODE.i_block[13], ibuf);
+			// get block number. subtract num of indirect+direct blocks, THEN divide by 256 (to account for indirect block SPACE)
+			blk = ibuf[(logical_block - (BLKSIZE/sizeof(int)) - 12)/(BLKSIZE/sizeof(int))];
+			if (blk==0){
+				// allocate a disk block;
+				blk = ibuf[blk] = balloc(mip->dev);
+				// zero out the block on disk !!!!
+				get_block(mip->dev, blk, doubleibuf);
+				int *ip = (int*)doubleibuf, p=0;  // step thru block in chunks of sizeof(int), set each ptr to 0
+				for (p=0; p<BLKSIZE/sizeof(int);p++) ip[p] = 0;
+				put_block(mip->dev, blk, doubleibuf); // write back to disc
+				// increment iblock count
+				mip->INODE.i_blocks++;
+			}
+			// record it in i_block[13];
+			put_block(mip->dev, mip->INODE.i_block[13], ibuf); // write back to disc
+			// at i_block[13], we have array of pointer. each pointer points to another table. blk is num of first nonfull table
+			// so NOW we get the correct block number and allocate any more blocks if necessary
+			memset(doubleibuf, '\0', BLKSIZE);  // this is 1024 bytes, but only use first 256
+			get_block(mip->dev, blk, doubleibuf);
+			blk = ibuf[(logical_block - (BLKSIZE/sizeof(int)) - 12)%(BLKSIZE/sizeof(int))];
+			if (blk==0){
+				// allocate a disk block;
+				blk = doubleibuf[blk] = balloc(mip->dev);
+				// increment iblock count
+				mip->INODE.i_blocks++;
+			}
+			// record it
+			put_block(mip->dev, blk, doubleibuf); // write back to disc
 		}
 
 		char wbuf[BLKSIZE];
