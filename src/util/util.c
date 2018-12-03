@@ -381,7 +381,7 @@ int enter_name(MINODE *minodePtr, int ino, char *name)
 }
 
 //page 338
-void rm_child(MINODE *parent_minodePtr, char *name)
+int rm_child(MINODE *parent_minodePtr, char *name)
 {
     int i;
     char buf[BLKSIZE];
@@ -395,7 +395,7 @@ void rm_child(MINODE *parent_minodePtr, char *name)
     DIR *predecessor_dp;
     DIR *start_dp; //for when we have to find the child, first or middle
 
-    printf("Attempting to remove %s\n", name);
+    printf("rm_child: attempting to remove %s\n", name);
 
     for (i = 0; i < 12; i++)
     {
@@ -416,7 +416,7 @@ void rm_child(MINODE *parent_minodePtr, char *name)
                 printf("rm_child: child found\n");
                 if (cp == buf && cp + dp->rec_len == buf + BLKSIZE)
                 {
-                    free(buf);
+                    memset(buf, '\0', BLKSIZE);
                     bdealloc(dev, ip->i_block[i]); //we are now deallocating the block
 
                     parent_inodePtr->i_size -= BLKSIZE;
@@ -446,21 +446,21 @@ void rm_child(MINODE *parent_minodePtr, char *name)
 
                     start_dp->rec_len += dp->rec_len;
 
-                    first = cp + dp->rec_len; //add deleted rec_len to the last entry
-                    last = buf + BLKSIZE;
-                    memcpy(cp, first, last - first); //move all trailing entries left page 340
+                    first = (int)cp + dp->rec_len; //add deleted rec_len to the last entry
+                    last = (int)buf + BLKSIZE;
+                    memcpy(cp, (void*)first, last - first); //move all trailing entries left page 340
                     put_block(dev, parent_inodePtr->i_block[i], buf);
                 }
                 parent_minodePtr->dirty = 1;
                 iput(parent_minodePtr); //releases a used minode pointed to by ptr
-                return;
+                return 0;
             }
             predecessor_dp = dp;
             cp += dp->rec_len;
             dp = (DIR *)cp;
         }
     }
-    return;
+    return 0;
 }
 
 int tst_bit(char *buf, int bit)

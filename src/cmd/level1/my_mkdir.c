@@ -42,7 +42,7 @@ void mk_dir(char path[MAX_FILENAME_LEN])
     strcpy(child, basename(t2));
 
     //need to know the parents INODE number
-    ino=getino(running->cwd, parent); //returns current working directory
+    ino=getino(&running->cwd->dev, parent); //returns current working directory
     printf("Inode: %d\n", ino);
     minodePtr=iget(dev,ino); //refer to page 323 in sys programming book
     inodePtr=&minodePtr->INODE;
@@ -53,7 +53,7 @@ void mk_dir(char path[MAX_FILENAME_LEN])
         return;
     }
 
-    if(getino(running->cwd, path)!=0)
+    if(getino(&running->cwd->dev, path)!=0)
     {
         printf("ERROR: %s is already a directory\n", path);
         return;

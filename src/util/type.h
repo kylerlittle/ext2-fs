@@ -69,9 +69,12 @@ typedef struct oft{ //page 321
   int  offset;
 }OFT;
 
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> 42937843bb66c7b6930afffaecd1bba84037f94c
 typedef struct proc{
   struct proc *next;
   int          pid;

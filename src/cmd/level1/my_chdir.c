@@ -13,7 +13,7 @@ char line[MAX_INPUT_LEN], cmd[32], pathname[MAX_FILENAME_LEN];
 
 int my_chdir(int argc, char *argv[])
 {
-  char temp[256];
+  char temp[MAX_FILENAME_LEN];
   char buf[BLKSIZE];
   DIR *dp;
   MINODE *ip, *newip, *cwd;
@@ -24,7 +24,7 @@ int my_chdir(int argc, char *argv[])
   {
     iput(running->cwd);
     running->cwd = iget(root->dev, 2);
-    return;
+    return -1;
   }
 
   if (strcmp(argv[0], "/") == 0)
@@ -36,7 +36,7 @@ int my_chdir(int argc, char *argv[])
 
   if (!ino)
   {
-    printf("cd : no such directory\n");
+    printf("my_cd : no such directory\n");
     return (-1);
   }
   printf("dev=%d ino=%d\n", dev, ino);
@@ -55,4 +55,5 @@ int my_chdir(int argc, char *argv[])
   running->cwd = newip;
 
   printf("after cd : cwd = [%d %d]\n", running->cwd->dev, running->cwd->ino);
+  return 0;
 }
