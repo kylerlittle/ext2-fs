@@ -18,8 +18,7 @@ int rpwd(MINODE *wd)
   u32 myino, parentino;
   DIR *dp;
 
-  if (wd == root)
-    return;
+  if (wd == root) return 0;
 
   parentino = findino(wd, &myino);
   parent = iget(dev, parentino);
@@ -31,7 +30,7 @@ int rpwd(MINODE *wd)
   iput(parent);
   printf("/%s", myname);
 
-  return 1;
+  return 0;
 }
 
 char* pwd(MINODE *wd)
@@ -39,10 +38,11 @@ char* pwd(MINODE *wd)
   if (wd == root)
   {
     printf("/\n");
-    return;
+    return 0;
   }
   rpwd(wd);
   printf("\n");
+  return 0;
 }
 
 int my_pwd(int argc, char *argv[]) {

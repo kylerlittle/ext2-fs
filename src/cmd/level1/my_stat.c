@@ -56,9 +56,10 @@ int stat_file(MINODE *mip, char *name)
   // ss[12] = 0;
 
   // printf("%s", ss);
-  printf("%8ld", mip->INODE.i_size);
+  printf("%8d", mip->INODE.i_size);
   char filetime[256];
-  strcpy(filetime, ctime(&mip->INODE.i_mtime));
+  time_t thetime = (time_t)mip->INODE.i_mtime;
+  strcpy(filetime, ctime(&thetime));
   filetime[strlen(filetime)-1] = 0; // kill '\n'
   printf("  %s", filetime);
 

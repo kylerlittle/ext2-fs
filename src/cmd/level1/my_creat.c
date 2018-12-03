@@ -18,7 +18,7 @@ int my_creat(int argc, char *argv[])
 	strcpy(child_name, basename(t2));
 
 	//get ino of parent
-	ino = getino(running->cwd, parent_name);
+	ino = getino(&running->cwd->dev, parent_name);
 	//printf("%d\n", ino);
 	parent_minodePtr = iget(dev, ino);
 	parent_inodePtr = &parent_minodePtr->INODE;
@@ -27,21 +27,21 @@ int my_creat(int argc, char *argv[])
 	if(!parent_minodePtr)
 	{
 		printf("ERROR: Parent does not exist\n");
-		return;
+		return -1;
 	}
 
 	//check if directory
 	if(!S_ISDIR(parent_inodePtr->i_mode))
 	{
 		printf("ERROR: Parent is not a directory\n");
-		return;
+		return -1;
 	}
 
 	//check if dir exists
-	if(getino(running->cwd, argv[0]) != 0)
+	if(getino(&running->cwd->dev, argv[0]) != 0)
 	{
 		printf("ERROR: %s already exists\n", argv[0]);
-		return;
+		return -1;
 	}
 	
 	creat_child_under_pmip(parent_minodePtr, child_name);
@@ -53,7 +53,7 @@ int my_creat(int argc, char *argv[])
 
 	iput(parent_minodePtr);
 
-	return;
+	return 0;
 }
 
 int creat_child_under_pmip(MINODE *parent_minodePtr, char *child_name)

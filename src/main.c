@@ -24,11 +24,11 @@ int input_help() {
     int i = 0;
     printf("\n*********************** MENU ***********************");
     while (cmd_table[i].command_as_string) {
-        if (i % 10 == 0) printf("*\n* "); // ten commands per line
+        if (i % 8 == 0) printf("\n*   "); // eight commands per line
         printf("%s ", cmd_table[i].command_as_string);
         i++;
     }
-    printf("*\n*****************************************************\ninput command : ");
+    printf("\n****************************************************\ninput command : ");
 }
 
 void get_input(char *line) {
