@@ -16,7 +16,7 @@ int my_open(int argc, char *argv[])
 	// 1. ask for a pathname and mode to open:
 	int mode = 0;
 	char filename[MAX_FILENAME_LEN], mode_str[4];
-	if (argc < 1) {
+	if (argc < 1) {  // they supplied no args
 		printf("my_open: enter filename : ");
 		fgets(filename, MAX_FILENAME_LEN, stdin);
   		filename[strlen(filename) - 1] = '\0';
@@ -24,13 +24,13 @@ int my_open(int argc, char *argv[])
 		fgets(mode_str, 4, stdin);
   		mode_str[strlen(mode_str) - 1] = '\0';
 		mode = atoi(mode_str);
-	} else if (argc < 2) {
+	} else if (argc < 2) {   // they supplied a file name, no mode
 		printf("my_open: enter mode 0|1|2|3 for R|W|RW|APPEND: ");
 		fgets(mode_str, 4, stdin);
   		mode_str[strlen(mode_str) - 1] = '\0';
 		mode = atoi(mode_str);
 		strcpy(filename, argv[0]);
-	} else {
+	} else {  // they supplied everything
 		strcpy(filename, argv[0]);
 		mode = atoi(argv[1]);
 	}

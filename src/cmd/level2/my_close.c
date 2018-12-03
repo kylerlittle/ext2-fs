@@ -1,0 +1,43 @@
+#include "my_close.h"
+
+/**** globals defined in main.c file ****/
+MINODE minode[NMINODE];
+MINODE *root;
+PROC   proc[NPROC], *running;
+char gpath[MAX_FILENAME_LEN];
+char *name[MAX_COMPONENTS];
+int n;
+int fd, dev;
+int nblocks, ninodes, bmap, imap, inode_start;
+char line[MAX_INPUT_LEN], cmd[32], pathname[MAX_FILENAME_LEN];
+
+int my_close(int argc, char *argv[])
+{
+	// argv[0] is fd user wishes to close
+
+	// 1. Check whether fd is valid to close.
+	int i = 0, fd_to_close = atoi(argv[0]);
+	if (fd_to_close < 0 || fd_to_close >= NFD) {
+		printf("my_close: ERROR -- invalid file descriptor\n");
+		return -1;
+	}
+	if (running->fd[fd_to_close] == NULL) {
+		printf("my_close: ERROR -- no fd %d in table\n", fd_to_close);
+		return -1;
+	}
+
+	// 2. fd is valid, so set ptr to NULL in table, decrement refCount
+	OFT *oftp = running->fd[fd_to_close];
+    running->fd[fd_to_close] = NULL;
+    oftp->refCount--;
+    if (oftp->refCount > 0) return 0;
+
+    // 3. If last user of this OFT entry ==> dispose of the minode & free malloc'd memory
+    MINODE *mip = oftp->mptr;
+    iput(mip);
+
+	free(oftp);
+	printf("my_close: last user of fd, so free'd malloc'd mem\n");
+
+    return 0;
+}

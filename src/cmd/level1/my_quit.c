@@ -28,7 +28,7 @@ int my_quit(int argc, char *argv[]) {
     clear_tok_list(original_argv);
     // Lastly, deallocate any open file descriptors
     for (i=0; i<NFD; i++) {
-        if (running->fd[i] == NULL) break;
+        if (running->fd[i] == NULL) continue;
         free(running->fd[i]);
     }
     exit(0);

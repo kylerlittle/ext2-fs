@@ -25,12 +25,12 @@ void sw_kl_pfd(void)
     OFT *openFilePointer;
 
     printf("*********************** PFD ************************\n");
-    printf("fd\t mode\t offset\t device\t inode\n");
-    printf("--\t ----\t ------\t ------\t -----\n");
+    printf("fd\t\t mode\t offset\t device\t inode\n");
+    printf("--\t\t ----\t ------\t ------\t -----\n");
 
     for(int i=0;i<NFD;i++) //NOFT is defined as 40
     {
-        if (running->fd[i] == NULL) break;
+        if (running->fd[i] == NULL) continue;
         openFilePointer=running->fd[i];
         if(openFilePointer->refCount==0)
         {
@@ -40,19 +40,19 @@ void sw_kl_pfd(void)
 
         if(openFilePointer->mode==0)
         {
-            printf("READ");
+            printf("%12s", "READ");
         }
         else if(openFilePointer->mode==1)
         {
-            printf("WRITE");
+            printf("%12s", "WRITE");
         }
         else if(openFilePointer->mode==2)
         {
-            printf("READ/WRITE");
+            printf("%12s", "READ/WRITE");
         }
         else if(openFilePointer->mode==3)
         {
-            printf("APPEND");
+            printf("%12s", "APPEND");
         }
         else
         {

@@ -23,6 +23,7 @@ CMD cmd_table[] = {
     {"pfd",         &my_pfd},
     {"open",        &my_open},
     {"lseek",       &my_lseek},
+    {"close",       &my_close},
     {NULL,          NULL}
 };
 

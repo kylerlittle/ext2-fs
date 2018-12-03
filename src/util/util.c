@@ -670,4 +670,11 @@ int truncate(MINODE *mip) {
   }
   bdealloc(mip->dev, mip->INODE.i_block[13]);
   ip->i_block[13] = 0; // clear this
+
+  // Lastly, set inode size to 0 and mark as dirty
+  mip->INODE.i_atime = mip->INODE.i_mtime = time(NULL);
+  mip->dirty = 1;
+  mip->INODE.i_size = 0;
+  mip->INODE.i_blocks = 0;  // no more blocks
+  printf("truncate: success\n");
 }
