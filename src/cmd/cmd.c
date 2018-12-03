@@ -21,6 +21,7 @@ CMD cmd_table[] = {
     {"touch",       &my_touch},
     {"stat",        &my_stat},
     {"pfd",         &my_pfd},
+    {"open",        &my_open},
     {NULL,          NULL}
 };
 

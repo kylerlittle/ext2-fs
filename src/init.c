@@ -84,6 +84,11 @@ int init_start_proc() {
     // Let cwd of both P0 and P1 point at the root minode (refCount=3)
     proc[0].cwd = iget(dev, 2); 
     proc[1].cwd = iget(dev, 2);
+    int i = 0;
+    // Set each OFT pointer in fd table to NULL
+    for (i=0; i<NFD; i++) {
+        running->fd[i] = NULL;
+    }
 }
 
 /* mount root file system, establish / and CWDs */
