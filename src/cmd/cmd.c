@@ -22,6 +22,7 @@ CMD cmd_table[] = {
     {"stat",        &my_stat},
     {"pfd",         &my_pfd},
     {"open",        &my_open},
+    {"lseek",       &my_lseek},
     {NULL,          NULL}
 };
 

@@ -14,7 +14,7 @@ void sw_kl_pfd(char *filename)
     //int i=0;
     OFT *openFilePointer;
 
-    printf("=====================PFD=====================\n");
+    printf("*********************** PFD ************************\n");
     printf("fd\t mode\t offset\t device\t inode\n");
     printf("--\t ----\t ------\t ------\t -----\n");
 
@@ -30,23 +30,23 @@ void sw_kl_pfd(char *filename)
 
         if(openFilePointer->mode==0)
         {
-            printf("RD");
+            printf("READ");
         }
         else if(openFilePointer->mode==1)
         {
-            printf("WR");
+            printf("WRITE");
         }
         else if(openFilePointer->mode==2)
         {
-            printf("RW");
+            printf("READ/WRITE");
         }
         else if(openFilePointer->mode==3)
         {
-            printf("AP");
+            printf("APPEND");
         }
         else
         {
-            printf("--");
+            printf("-----");
         }
     }
 

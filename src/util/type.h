@@ -62,14 +62,15 @@ typedef struct minode{
   struct mntable *mptr;
 }MINODE;
 
-typedef struct oft{
+typedef struct oft{ //page 321
   int  mode;
   int  refCount;
   MINODE *mptr;
   int  offset;
 }OFT;
 
-OFT oft[NOFT]; //page 321
+
+
 
 typedef struct proc{
   struct proc *next;
