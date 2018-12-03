@@ -678,3 +678,16 @@ int truncate(MINODE *mip) {
   mip->INODE.i_blocks = 0;  // no more blocks
   printf("truncate: success\n");
 }
+
+int fd_is_valid(int fd) {
+  // Check whether fd is valid.
+	if (fd < 0 || fd >= NFD) {
+		printf("fd_is_valid: ERROR -- invalid file descriptor\n");
+		return -1;
+	}
+	if (running->fd[fd] == NULL) {
+		printf("fd_is_valid: ERROR -- no fd %d in table\n", fd);
+		return -1;
+	}
+  return 0;
+}

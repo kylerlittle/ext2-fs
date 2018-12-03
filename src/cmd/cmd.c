@@ -24,6 +24,7 @@ CMD cmd_table[] = {
     {"open",        &my_open},
     {"lseek",       &my_lseek},
     {"close",       &my_close},
+    {"write",       &my_write},
     {NULL,          NULL}
 };
 

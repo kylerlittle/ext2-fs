@@ -16,15 +16,9 @@ int my_close(int argc, char *argv[])
 	// argv[0] is fd user wishes to close
 
 	// 1. Check whether fd is valid to close.
-	int i = 0, fd_to_close = atoi(argv[0]);
-	if (fd_to_close < 0 || fd_to_close >= NFD) {
-		printf("my_close: ERROR -- invalid file descriptor\n");
-		return -1;
-	}
-	if (running->fd[fd_to_close] == NULL) {
-		printf("my_close: ERROR -- no fd %d in table\n", fd_to_close);
-		return -1;
-	}
+	int fd_to_close = atoi(argv[0]);
+	int result = fd_is_valid(fd_to_close); // returns 0 if valid; -1 otherwise
+	if (result) return -1;
 
 	// 2. fd is valid, so set ptr to NULL in table, decrement refCount
 	OFT *oftp = running->fd[fd_to_close];

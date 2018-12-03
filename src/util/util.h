@@ -42,6 +42,7 @@ int incFreeDataBlocks(int dev);
 int balloc(int dev);
 int bdealloc(int dev, int ino);
 int truncate(MINODE *mip);
+int fd_is_valid(int fd);
 
 #endif
 /*********************************************************/
