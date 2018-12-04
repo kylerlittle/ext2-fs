@@ -17,5 +17,6 @@ extern char line[MAX_INPUT_LEN], cmd[32], pathname[MAX_FILENAME_LEN];
 
 /**** Function Prototypes ****/
 int my_open(int argc, char *argv[]);
+int sw_kl_open(char *filename, int mode);
 
 #endif

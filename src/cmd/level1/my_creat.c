@@ -2,57 +2,13 @@
 
 int my_creat(int argc, char *argv[])
 {
-	int i, ino;
-	MINODE *parent_minodePtr;
-	INODE *parent_inodePtr;
-
-	char buf[BLKSIZE];
-	char t1[BLKSIZE], t2[BLKSIZE];
-	char parent_name[BLKSIZE], child_name[BLKSIZE];
-
-	strcpy(t1, argv[0]);
-	strcpy(t2, argv[0]);
-
-	//get basename and dirname of argv[0]
-	strcpy(parent_name, dirname(t1));
-	strcpy(child_name, basename(t2));
-
-	//get ino of parent
-	ino = getino(&running->cwd->dev, parent_name);
-	//printf("%d\n", ino);
-	parent_minodePtr = iget(dev, ino);
-	parent_inodePtr = &parent_minodePtr->INODE;
-
-	//check if the parent exists
-	if(!parent_minodePtr)
-	{
-		printf("ERROR: Parent does not exist\n");
-		return -1;
+	int i;
+	for (i=0;i<argc;i++) {
+		if (sw_kl_creat(argv[i])) {
+			printf("my_creat: ERROR -- stopped after %s\n", argv[i]);
+			return -1;
+		}
 	}
-
-	//check if directory
-	if(!S_ISDIR(parent_inodePtr->i_mode))
-	{
-		printf("ERROR: Parent is not a directory\n");
-		return -1;
-	}
-
-	//check if dir exists
-	if(getino(&running->cwd->dev, argv[0]) != 0)
-	{
-		printf("ERROR: %s already exists\n", argv[0]);
-		return -1;
-	}
-	
-	creat_child_under_pmip(parent_minodePtr, child_name);
-
-	//size = 0, linkcount = 1, don't increment parent's links count
-	parent_inodePtr->i_atime = time(0L);
-
-	parent_minodePtr->dirty = 1;
-
-	iput(parent_minodePtr);
-
 	return 0;
 }
 
@@ -93,4 +49,59 @@ int creat_child_under_pmip(MINODE *parent_minodePtr, char *child_name)
 
 	//return the ino
 	return ino;
+}
+
+int sw_kl_creat(char *filename) {
+	int i, ino;
+	MINODE *parent_minodePtr;
+	INODE *parent_inodePtr;
+
+	char buf[BLKSIZE];
+	char t1[BLKSIZE], t2[BLKSIZE];
+	char parent_name[BLKSIZE], child_name[BLKSIZE];
+
+	strcpy(t1, filename);
+	strcpy(t2, filename);
+
+	//get basename and dirname of argv[0]
+	strcpy(parent_name, dirname(t1));
+	strcpy(child_name, basename(t2));
+
+	//get ino of parent
+	ino = getino(&running->cwd->dev, parent_name);
+	//printf("%d\n", ino);
+	parent_minodePtr = iget(dev, ino);
+	parent_inodePtr = &parent_minodePtr->INODE;
+
+	//check if the parent exists
+	if(!parent_minodePtr)
+	{
+		printf("ERROR: Parent does not exist\n");
+		return -1;
+	}
+
+	//check if directory
+	if(!S_ISDIR(parent_inodePtr->i_mode))
+	{
+		printf("ERROR: Parent is not a directory\n");
+		return -1;
+	}
+
+	//check if dir exists
+	if(getino(&running->cwd->dev, filename) != 0)
+	{
+		printf("ERROR: %s already exists\n", filename);
+		return -1;
+	}
+	
+	creat_child_under_pmip(parent_minodePtr, child_name);
+
+	//size = 0, linkcount = 1, don't increment parent's links count
+	parent_inodePtr->i_atime = time(0L);
+
+	parent_minodePtr->dirty = 1;
+
+	iput(parent_minodePtr);
+
+	return 0;
 }

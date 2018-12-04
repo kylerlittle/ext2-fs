@@ -1,6 +1,8 @@
 #include "my_cp.h"
 #include "my_open.h"
 #include "my_close.h"
+#include "my_read.h"
+#include "my_write.h"
 #include "../level1/my_creat.h"
 
 /**** globals defined in main.c file ****/
@@ -25,28 +27,25 @@ int my_cp(int argc, char *argv[])
 	strcpy(src, argv[0]); strcpy(dst, argv[1]);
 
 	int src_fd, dst_fd;
-	char *src_argv[2] = {"0", src}, *dst_argv[2] = {"2", dst};  // mode 0 is READ; mode 2 is READ/WRITE
-	src_fd = my_open(2, src_argv);
-	dst_fd = my_open(2, dst_argv);
-	if (dst_fd == -1) {
-		printf("my_cp: creating %s since didn't exist\n", dst);
-		my_creat(1, &dst_argv[1]);
-		dst_fd = my_open(2, dst_argv); // don't forget to reopen!!
-	}
-	char src_fd_str[32], dst_fd_str[32];
-	sprintf(src_fd_str, "%d", src_fd);  // handy conversion back to string
-	sprintf(dst_fd_str, "%d", dst_fd);  // handy conversion back to string
-	char *src_fd_str_argv[1] = {src_fd_str}, *dst_fd_str_argv[1] = {dst_fd_str};
+	src_fd = sw_kl_open(src, 0);  // mode 0 is READ;
+	dst_fd = sw_kl_open(dst, 2);  // mode 2 is READ/WRITE
+
 	if (src_fd == -1 || dst_fd == -1) {
-		if (src_fd != -1) my_close(1, src_fd_str_argv);
-		if (dst_fd != -1) my_close(1, dst_fd_str_argv);
+		if (src_fd == -1) sw_kl_close(src_fd);
+		if (dst_fd == -1) sw_kl_close(dst_fd);
 		printf("my_cp: open %s or open %s failed\n", src, dst);
 		return -1;
 	}
 
 	// 2. Read/write!
+	int n=0;
+	char buf[BLKSIZE];
+	while ((n=sw_kl_read(src_fd, buf, BLKSIZE)) != 0){
+       sw_kl_write(dst_fd, buf, n);  // notice the n in write()
+	   memset(buf, '\0', BLKSIZE);
+   	}
 
 	// 3. Close file descriptors
-	my_close(1, src_fd_str_argv);
-	my_close(1, dst_fd_str_argv);
+	sw_kl_close(src_fd);
+	sw_kl_close(dst_fd);
 }

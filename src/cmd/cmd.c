@@ -26,6 +26,7 @@ CMD cmd_table[] = {
     {"close",       &my_close},
     {"write",       &my_write},
     {"read",        &my_read},
+    {"cp",          &my_cp},
     {NULL,          NULL}
 };
 

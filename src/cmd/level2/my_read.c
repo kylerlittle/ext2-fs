@@ -68,15 +68,15 @@ int sw_kl_read(int fd, char buf[], int nbytes)
     fileSize = oftp->mptr->INODE.i_size; //file size
                                          // int count2=0;
     avil = fileSize - (oftp->offset);
-    //printf("avil:%d\n", avil);
+    printf("sw_kl_read: available bytes to read:%d\n", avil);
     // use cq to iterate over buf
     char *cq = buf;
 
-    if (nbytes > avil) //cant read more than the file size available
+    if (nbytes > avil) // can't read more than the file size available
     {
         nbytes = avil;
         //printf("avil:%d\n", avil);
-        return;
+        // return 0;
     }
 
     while (nbytes > 0 && avil > 0) //read until we read the amount we were supposed to

@@ -21,15 +21,17 @@ int my_close(int argc, char *argv[])
 		printf("ERROR: you must provide a file descriptor\n");
 		return -1;
 	}
-	else{
 	int fd_to_close = atoi(argv[0]);
 	
 	int result = fd_is_valid(fd_to_close); // returns 0 if valid; -1 otherwise
 	if (result) return -1;
+	return sw_kl_close(fd_to_close);
+}
 
+int sw_kl_close(int fd) {
 	// 2. fd is valid, so set ptr to NULL in table, decrement refCount
-	OFT *oftp = running->fd[fd_to_close];
-    running->fd[fd_to_close] = NULL;
+	OFT *oftp = running->fd[fd];
+    running->fd[fd] = NULL;
     oftp->refCount--;
     if (oftp->refCount > 0) return 0;
 
@@ -41,5 +43,4 @@ int my_close(int argc, char *argv[])
 	printf("my_close: last user of fd, so free'd malloc'd mem\n");
 
     return 0;
-	}
 }

@@ -1,4 +1,5 @@
 #include "my_open.h"
+#include "../level1/my_creat.h"
 
 /**** globals defined in main.c file ****/
 MINODE minode[NMINODE];
@@ -34,16 +35,21 @@ int my_open(int argc, char *argv[])
 		strcpy(filename, argv[0]);
 		mode = atoi(argv[1]);
 	}
+	sw_kl_open(filename, mode);
+}
 
+int sw_kl_open(char *filename, int mode) {
 	// 2. get pathname's inumber:
 	int dev;
 	if (filename[0]=='/') dev = root->dev;          // root INODE's dev
 	else dev = running->cwd->dev;  
-	int ino = getino(&dev, filename); 
+	int ino = getino(&dev, filename);
 
 	if (ino == 0) {
-		printf("my_open: %s doesn't exist\n", filename);
-		return -1;
+		printf("my_open: %s doesn't exist so creating it\n", filename);
+		int r = sw_kl_creat(filename);
+		if (r == 0) printf("my_open: %s created successfully\n", filename);
+		ino = getino(&dev, filename);
 	}
 	
 	// 3. get its Minode pointer
@@ -110,7 +116,7 @@ int my_open(int argc, char *argv[])
 	// 8. update INODE's time field
     //      for R: touch atime. 
     //      for W|RW|APPEND mode : touch atime and mtime
-    //   mark Minode[ ] dirty
+    //    mark Minode[ ] dirty
 	if (mode > 0) {
 		mip->INODE.i_mtime = time(NULL); //updates the file modification time
 	}
