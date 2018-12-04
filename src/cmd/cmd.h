@@ -24,6 +24,7 @@
 #include "level2/my_write.h"
 #include "level2/my_read.h"
 #include "level2/my_cp.h"
+#include "level2/my_cat.h"
 #include <stdio.h>
 #include <string.h>
 
