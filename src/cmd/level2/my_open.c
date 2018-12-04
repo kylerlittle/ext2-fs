@@ -35,7 +35,7 @@ int my_open(int argc, char *argv[])
 		strcpy(filename, argv[0]);
 		mode = atoi(argv[1]);
 	}
-	sw_kl_open(filename, mode);
+	return sw_kl_open(filename, mode);
 }
 
 int sw_kl_open(char *filename, int mode) {
