@@ -16,7 +16,14 @@ int my_close(int argc, char *argv[])
 	// argv[0] is fd user wishes to close
 
 	// 1. Check whether fd is valid to close.
+	if(argc<1)
+	{
+		printf("ERROR: you must provide a file descriptor\n");
+		return -1;
+	}
+	else{
 	int fd_to_close = atoi(argv[0]);
+	
 	int result = fd_is_valid(fd_to_close); // returns 0 if valid; -1 otherwise
 	if (result) return -1;
 
@@ -34,4 +41,5 @@ int my_close(int argc, char *argv[])
 	printf("my_close: last user of fd, so free'd malloc'd mem\n");
 
     return 0;
+	}
 }
