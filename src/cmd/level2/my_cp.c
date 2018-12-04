@@ -25,7 +25,10 @@ int my_cp(int argc, char *argv[])
 	}
 	char src[MAX_FILENAME_LEN], dst[MAX_FILENAME_LEN];
 	strcpy(src, argv[0]); strcpy(dst, argv[1]);
+	return sw_kl_cp(src, dst);
+}
 
+int sw_kl_cp(char *src, char *dst) {
 	int src_fd, dst_fd;
 	src_fd = sw_kl_open(src, 0);  // mode 0 is READ;
 	dst_fd = sw_kl_open(dst, 2);  // mode 2 is READ/WRITE
@@ -49,4 +52,5 @@ int my_cp(int argc, char *argv[])
 	// 3. Close file descriptors
 	sw_kl_close(src_fd);
 	sw_kl_close(dst_fd);
+	return 0;
 }

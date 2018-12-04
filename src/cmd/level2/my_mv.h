@@ -1,5 +1,5 @@
-#ifndef __LINK__
-#define __LINK__
+#ifndef __MOVE__
+#define __MOVE__
 
 /**** Included headers/libraries ****/
 #include "../../util/util.h"
@@ -16,7 +16,7 @@ extern int nblocks, ninodes, bmap, imap, inode_start;
 extern char line[MAX_INPUT_LEN], cmd[32], pathname[MAX_FILENAME_LEN];
 
 /**** Function Prototypes ****/
-int my_link(int argc, char *argv[]);
-int sw_kl_link(char *oldfile, char *newlink);
+int my_mv(int argc, char *argv[]);
+int sw_kl_mv(char *src, char *dst);
 
 #endif
