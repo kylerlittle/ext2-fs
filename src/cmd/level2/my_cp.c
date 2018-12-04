@@ -40,6 +40,7 @@ int my_cp(int argc, char *argv[])
 	// 2. Read/write!
 	int n=0;
 	char buf[BLKSIZE];
+	memset(buf, '\0', BLKSIZE);
 	while ((n=sw_kl_read(src_fd, buf, BLKSIZE)) != 0){
        sw_kl_write(dst_fd, buf, n);  // notice the n in write()
 	   memset(buf, '\0', BLKSIZE);
