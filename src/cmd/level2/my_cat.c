@@ -32,14 +32,14 @@ int my_cat(int argc, char *argv[])
 int sw_kl_cat(char *pathname)
 {
     int n, i;
-    char mybuf[1024];
+    char mybuf[BLKSIZE];
     int fd = 0;
     char dummy = 0;
 
 
     fd = sw_kl_open(pathname, 0); //make sure to open for read
     //printf("fd: %d\n", fd);
-    while (n=sw_kl_read(fd, mybuf, 1024))
+    while (n=sw_kl_read(fd, mybuf, BLKSIZE))
     {
         //printf("in while\n");
         char *cp = mybuf; //char ptr

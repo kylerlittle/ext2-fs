@@ -96,7 +96,9 @@ int sw_kl_open(char *filename, int mode) {
 		case 0 : 
 			oftp->offset = 0;     // R: offset = 0
 			break;
-		case 1 : truncate(mip);        // W: truncate file to 0 size
+		case 1 : 
+			truncate(mip);        // W: truncate file to 0 size
+			iput(mip);
 			oftp->offset = 0;
 			break;
         case 2 : 

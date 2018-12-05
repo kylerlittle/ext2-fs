@@ -623,48 +623,53 @@ int bdealloc(int dev, int ino) {
 /* Remove all of mip->INODE's data blocks! Then iput back to disc. */
 int truncate(MINODE *mip) {
   printf("truncate: deallocating direct block numbers\n");
-  int i = 0;
+  int i = 0, *int_p, *double_int_p, counter, i_counter;
   INODE *ip = &mip->INODE;
-  char buf[BLKSIZE], indirect_buf[BLKSIZE];
-  for (i=0; i < 15; ++i) {
+  char buf[BLKSIZE] = {0}, indirect_buf[BLKSIZE] = {0};
+  for (i=0; i < 12; ++i) {
       if (ip->i_block[i] == 0) break;
       printf("i_block[%d] = %d\n", i, ip->i_block[i]);
       // remove direct block now
       bdealloc(mip->dev, mip->INODE.i_block[i]);
       ip->i_block[i] = 0;
   }
-  if (i >= 12) {
+  if (ip->i_block[12]) {
       printf("truncate: deallocating indirect block numbers\n");
       get_block(dev, ip->i_block[12], buf);
-      int * int_p = (int *)buf, counter = 0;
+      int_p = (int *)buf;
+      counter = 0;
       while (counter < BLKSIZE / sizeof(int)) {
-          if (*int_p == 0) break;
-          printf("%d  ", *int_p);
+          if (int_p[counter] == 0) break;
+          printf("%d  ", int_p[counter]);
           // remove indirect block now
-          bdealloc(mip->dev, *int_p);
-          *int_p = 0;  // set it to 0 now since it's been deallocated
-          int_p++; counter++;
+          bdealloc(mip->dev, int_p[counter]);
+          // int_p[counter] = 0;  // set it to 0 now since it's been deallocated
+          counter++;
       }
   }
   bdealloc(mip->dev, mip->INODE.i_block[12]);
   ip->i_block[12] = 0; // clear this
-  if (i >= 13) {
-      printf("truncate: deallocating double indirect block numbers\n");
+  if (ip->i_block[13]) {
+      printf("\ntruncate: deallocating double indirect block numbers\n");
       get_block(dev, ip->i_block[13], buf);
-      int * int_p = (int *)buf, counter = 0;
+      int_p = (int *)buf;
+      counter = 0;
       while (counter < BLKSIZE / sizeof(int)) {
-          if (*int_p == 0) break;
-          get_block(dev, *int_p, indirect_buf);
-          int * double_int_p = (int *)indirect_buf, i_counter = 0;
+          if (int_p[counter] == 0) break;
+          get_block(dev, int_p[counter], indirect_buf);
+          double_int_p = (int *)indirect_buf;
+          i_counter = 0;
           while (i_counter < BLKSIZE / sizeof(int)) {
-              if (*double_int_p == 0) break;
-              printf("%d  ", *double_int_p);
+              if (double_int_p[i_counter] == 0) break;
+              printf("%d  ", double_int_p[i_counter]);
               // remove double indirect block now
-              bdealloc(mip->dev, *double_int_p);
-              *double_int_p = 0;  // set it to 0 now since it's been deallocated
-              double_int_p++; i_counter++;
+              bdealloc(mip->dev, double_int_p[i_counter]);
+              double_int_p[i_counter] = 0;  // set it to 0 now since it's been deallocated
+              i_counter++;
           }
-          int_p++; counter++;
+          bdealloc(mip->dev, *int_p);
+          int_p[counter] = 0;
+          counter++;
       }
       printf("\n");
   }

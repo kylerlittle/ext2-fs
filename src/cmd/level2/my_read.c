@@ -60,8 +60,9 @@ int my_read(int argc, char *argv[])
 /* Precondition: fd is valid*/
 int sw_kl_read(int fd, char buf[], int nbytes)
 {
-    int logical_block, startByte, blk, avil, fileSize, offset, remain, count = 0; //avil is filesize-offset
-    char ibuf[BLKSIZE] = {0}, doubleibuf[BLKSIZE] = {0}, writebuf[BLKSIZE] = {0};
+    int logical_block, startByte, blk, avil, fileSize, offset, remain, count = 0,
+        ibuf[BLKSIZE] = {0}, doubleibuf[BLKSIZE] = {0}; //avil is filesize-offset
+    char writebuf[BLKSIZE] = {0};
     OFT *oftp = running->fd[fd];
     MINODE *mip = oftp->mptr;
     fileSize = oftp->mptr->INODE.i_size; //file size
@@ -96,27 +97,27 @@ int sw_kl_read(int fd, char buf[], int nbytes)
             blk = mip->INODE.i_block[logical_block]; // blk should be a disk block now [page 348]
         }
         else if (logical_block >= 12 && logical_block < 256 + 12)
-        { // INDIRECT blocks
-
-            // get i_block[12] into an int ibuf[256];
-            memset(ibuf, '\0', BLKSIZE); // this is 1024 bytes, but only use first 256
-            get_block(mip->dev, mip->INODE.i_block[12], ibuf);
+        {   // INDIRECT 
+            /* dont need to check if block exists
+               get i_block[12] into an int ibuf[256]; */
+            get_block(mip->dev, mip->INODE.i_block[12], (char*)ibuf);
             blk = ibuf[logical_block - 12]; //actual offset
-                                            //dont need to check if block exists
         }
         else
-        { // double indirect blocks
-            // First check if we even have the ptr array to keep track of double indirect blocks; if not, allocate block
-            // get i_block[13] into an int ibuf[256];
-            memset(ibuf, '\0', BLKSIZE); // this is 1024 bytes, but only use first 256
-            get_block(mip->dev, mip->INODE.i_block[13], ibuf);
-            // get block number. subtract num of indirect+direct blocks, THEN divide by 256 (to account for indirect block SPACE)
-            blk = ibuf[(logical_block - (BLKSIZE / sizeof(int)) - 12) / (BLKSIZE / sizeof(int))];
-
-            // so NOW we get the correct block number and allocate any more blocks if necessary
-            memset(doubleibuf, '\0', BLKSIZE); // this is 1024 bytes, but only use first 256
-            get_block(mip->dev, blk, doubleibuf);
-            blk = ibuf[(logical_block - (BLKSIZE / sizeof(int)) - 12) % (BLKSIZE / sizeof(int))];
+        {   // DOUBLE INDIRECT
+            /* First check if we even have the ptr array to keep track of double indirect blocks
+               get i_block[13] into an int ibuf[256]; */
+            get_block(mip->dev, mip->INODE.i_block[13], (char*)ibuf);
+            /* update logical_block for convenience. essentially subtract off all direct blocks and indirect blocks,
+			   so that double indirect block 0 is technically logical block 256+12;*/
+			logical_block = logical_block - (BLKSIZE/sizeof(int)) - 12;
+            /* get block number. subtract num of indirect+direct blocks, THEN divide by 256 since this gets
+               us appropriate index within array of ptrs to blocks (THE FIRST ARRAY) */
+            blk = ibuf[logical_block/ (BLKSIZE / sizeof(int))];
+            /* Now, get said block. This new block is essentially only a single level of indirection now
+               so mod by logical block by 256 and grab blk num within array. This is the correct block now. */
+            get_block(mip->dev, blk, (char*)doubleibuf);
+            blk = doubleibuf[logical_block % (BLKSIZE / sizeof(int))];
         }
 
         char rbuf[BLKSIZE];
