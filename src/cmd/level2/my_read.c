@@ -17,7 +17,7 @@ int my_read(int argc, char *argv[])
     // 1. ask for a fd and number of bytes to read
     int fd = 0;
     int nbytes = 0;
-    char fd_str[MAX_FILENAME_LEN], nBytesStr[BLKSIZE], buf[BLKSIZE];
+    char fd_str[MAX_FILENAME_LEN] = {0}, nBytesStr[BLKSIZE] = {0}, buf[BLKSIZE] = {0};
     if (argc < 1)
     { // they supplied no args
         printf("my_read: enter opened file descriptor to read from : ");
@@ -60,9 +60,8 @@ int my_read(int argc, char *argv[])
 /* Precondition: fd is valid*/
 int sw_kl_read(int fd, char buf[], int nbytes)
 {
-    printf("sw_kl_read: ECHO=%s\n", buf);
     int logical_block, startByte, blk, avil, fileSize, offset, remain, count = 0; //avil is filesize-offset
-    char ibuf[BLKSIZE], doubleibuf[BLKSIZE], writebuf[BLKSIZE];
+    char ibuf[BLKSIZE] = {0}, doubleibuf[BLKSIZE] = {0}, writebuf[BLKSIZE] = {0};
     OFT *oftp = running->fd[fd];
     MINODE *mip = oftp->mptr;
     fileSize = oftp->mptr->INODE.i_size; //file size
@@ -154,7 +153,7 @@ int sw_kl_read(int fd, char buf[], int nbytes)
             remain = 0;
         }
     }
-
+    printf("sw_kl_read: ECHO=%s\n", buf);
     printf("my_read: read %d char from file descriptor fd=%d\n", count, fd);
 
     return count;

@@ -64,8 +64,9 @@ int sw_kl_creat(char *filename) {
 	strcpy(t2, filename);
 
 	//get basename and dirname of argv[0]
-	strcpy(parent_name, dirname(t1));
 	strcpy(child_name, basename(t2));
+	strcpy(parent_name, dirname(t1));
+	
 
 	//get ino of parent
 	ino = getino(&running->cwd->dev, parent_name);

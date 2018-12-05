@@ -28,7 +28,7 @@ int strip_quotes(char *dst, char *src) {
 
 // Text is in argv[0] to argv[argc-1]
 int get_text(char *buf, int argc, char *argv[]) {
-	char temp[BLKSIZE];
+	char temp[BLKSIZE] = {0};
 	strcpy(temp, argv[0]);
 	strcat(temp, " ");
 	int i;
@@ -44,7 +44,7 @@ int my_write(int argc, char *argv[])
 {
 	// 1. ask for a fd and text to write in file
 	int fd = 0;
-	char fd_str[MAX_FILENAME_LEN], text[BLKSIZE], buf[BLKSIZE];
+	char fd_str[MAX_FILENAME_LEN] = {0}, text[BLKSIZE] = {0}, buf[BLKSIZE] = {0};
 	if (argc < 1) {  // they supplied no args
 		printf("my_write: enter opened file descriptor to write to : ");
 		fgets(fd_str, MAX_FILENAME_LEN, stdin);
@@ -80,7 +80,7 @@ int my_write(int argc, char *argv[])
 int sw_kl_write(int fd, char buf[], int nbytes) {
 	printf("sw_kl_write: ECHO=%s\n", buf);
 	int logical_block, startByte, blk, remain;
-	char ibuf[BLKSIZE], doubleibuf[BLKSIZE], writebuf[BLKSIZE];
+	char ibuf[BLKSIZE] = {0}, doubleibuf[BLKSIZE] = {0}, writebuf[BLKSIZE] = {0};
 	OFT *oftp = running->fd[fd];
 	MINODE *mip = oftp->mptr;
 
@@ -119,7 +119,7 @@ int sw_kl_write(int fd, char buf[], int nbytes) {
 				mip->INODE.i_blocks++;
 			}
 			// get i_block[12] into an int int_buf[256];
-			int int_buf[BLKSIZE/sizeof(int)];
+			int int_buf[BLKSIZE/sizeof(int)] = {0};
 			get_block(mip->dev, mip->INODE.i_block[12], (char*)int_buf);
 			blk = int_buf[logical_block - 12];
 			// "If an indirect data block does not exist, it must be allocated and recorded in the indirect block." -- KC Wang
@@ -150,7 +150,7 @@ int sw_kl_write(int fd, char buf[], int nbytes) {
 				mip->INODE.i_blocks++;
 			}
 			// get i_block[13] into an int buf[256];
-			int double_int_buf[BLKSIZE/sizeof(int)];
+			int double_int_buf[BLKSIZE/sizeof(int)] = {0};
 			get_block(mip->dev, mip->INODE.i_block[13], (char*)double_int_buf);
 			/* update logical_block for convenience. essentially subtract off all direct blocks and indirect blocks,
 			so that double indirect block 0 is technically logical block 256+12;
@@ -190,7 +190,7 @@ int sw_kl_write(int fd, char buf[], int nbytes) {
 			put_block(mip->dev, blk, (char*)double_int_buf); // write back to disc
 		}
 
-		char wbuf[BLKSIZE];
+		char wbuf[BLKSIZE] = {0};
 		/* all cases come to here : write to the data block */
 		get_block(mip->dev, blk, wbuf);   // read disk block into wbuf[ ]  
 		char *cp = wbuf + startByte;      // cp points at startByte in wbuf[]

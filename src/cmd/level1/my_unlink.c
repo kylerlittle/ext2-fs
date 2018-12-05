@@ -50,9 +50,9 @@ int sw_kl_unlink(char *filename) {
 
   // check directory of filename exists and is a DIR
   char parent_dir[MAX_FILENAME_LEN], link_child[MAX_FILENAME_LEN];
+  strcpy(link_child, basename(filename));
   strcpy(parent_dir, dirname(filename));
   if (parent_dir[0] == 0) strcpy(parent_dir, "/");
-  strcpy(link_child, basename(filename));
   printf("my_unlink: parent_dir is %s; child to unlink is %s\n", parent_dir, link_child);
 
   // I guess maybe dev could be different for parent, so get correct device to be sure

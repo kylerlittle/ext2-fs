@@ -61,8 +61,8 @@ int my_symlink(int argc, char *argv[])
 
   // check directory of argv[1] exists and is a DIR but that file does not yet exist in that directory (already did latter above)
   char parent_dir[MAX_FILENAME_LEN], link_child[MAX_FILENAME_LEN];
-  strcpy(parent_dir, dirname(argv[1]));
   strcpy(link_child, basename(argv[1]));
+  strcpy(parent_dir, dirname(argv[1]));
 
   parent_inode = getino(&new_dev, parent_dir);  // return non-zero if exists
   if (parent_inode == 0) {
